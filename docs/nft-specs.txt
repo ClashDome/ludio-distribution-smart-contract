@@ -1,0 +1,23 @@
+ENDLESS SIEGE LAND NFT
+
+Immutable Attributes
+
+name:				terrain name
+img:				NFT image
+id:	
+map_id:			    uint32 (the ID that we are using now in the game)
+land_data:			JSON object converted to a string containing the path, buildable cells and water cells.
+type:				string [duels, tournament o both]
+rarity:				(Mythical, Legendary, Epic, Rare o Common)
+co-owners_amount:	uint8 (1, 10, 15, 25 or 35)
+editable:			boolean (false)
+about:				NFT description
+artist:				ClashDome Studio
+link:				www.clashdome.io
+
+Mutable Attributes
+
+games_played:			    uint64 total games played in that specific terrain
+total_dead_orcs_counter:	uint64 total amount of orcs killed in that terreain
+partial_dead_orcs_counter:	uint64 will be divided between the owners 
+last_claim_timestamp:		uint64 

@@ -22,9 +22,6 @@ public:
 
 private:
 
-    // TODO: HARDCODEAR LOS TEMPLATES DE LOS TERRENOS
-    const int32_t ENDLESS_SIEGE_LANDS_TEMPLATE_ID[5] = {181328, 181347, 181342, 181332, 181333}; 
-
     const string GAME_NAMES[3] = {"Endless Siege", "Candy Fiesta", "Templok"};
 
     const string COLLECTION_NAME = "blcollection";

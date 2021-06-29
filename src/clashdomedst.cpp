@@ -14,12 +14,7 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
     check(asset_itr->collection_name == name(COLLECTION_NAME), "NFT doesn't correspond to " + COLLECTION_NAME);
     check(asset_itr->schema_name == name(SCHEMA_NAME), "NFT doesn't correspond to schema " + SCHEMA_NAME);
 
-    bool is_template_valid = find(begin(ENDLESS_SIEGE_LANDS_TEMPLATE_ID), end(ENDLESS_SIEGE_LANDS_TEMPLATE_ID), asset_itr->template_id) != end(ENDLESS_SIEGE_LANDS_TEMPLATE_ID);
-
-    check(is_template_valid, "NFT doesn't correspond to a valid template #" + to_string(asset_itr->template_id));
-
     // VER CUANTOS ORCOS HAY EN EL CONTADOR PARCIAL
-
     atomicassets::schemas_t collection_schemas = atomicassets::get_schemas(name(COLLECTION_NAME));
     auto schema_itr = collection_schemas.find(name(SCHEMA_NAME).value);
 
@@ -32,18 +27,18 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
     atomicassets::ATTRIBUTE_MAP idata = atomicdata::deserialize(immutable_serialized_data, schema_itr->format);
     atomicassets::ATTRIBUTE_MAP mdata = atomicdata::deserialize(mutable_serialized_data, schema_itr->format);
 
-    uint8_t co_ownters_amount = idata["co-owners_amount"];
-    uint64_t partial_dead_orcs_counter = mdata["partial_dead_orcs_counter"];
+    uint8_t co_ownters_amount = get<uint8_t> (idata["co-owners_amount"]);
+    uint64_t partial_dead_orcs_counter = get<uint64_t> (mdata["partial_dead_orcs_counter"]);
 
     // TODO: DETERMINAR LA CANTIDAD DE LUDIO QUE DA UN ORCO MUERTO
-    float ludio_per_orc = 0.01;
+    float ludio_per_orc = 0.01f;
 
-    uint32_t ludio_killed_orcs_reward = partial_dead_orcs_counter / co_ownters_amount * ludio_per_orc; // TODO: DETERMINAR COMO HACER ESTO CON DECIMALES
+    uint32_t killed_orcs_ludio_reward = (uint32_t) (partial_dead_orcs_counter / co_ownters_amount * ludio_per_orc * 10000); 
 
     // DAR EL LUDIO CORRESPONDIENTE
     asset ludio;
     ludio.symbol = LUDIO_SYMBOL;
-    ludio.amount = ludio_killed_orcs_reward * 10000;
+    ludio.amount = killed_orcs_ludio_reward;
 
     action(
         permission_level{get_self(), name("active")},
@@ -59,7 +54,7 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
 
     // CAMBIAR LOS PARAMETROS DEL NFT
     mdata["partial_dead_orcs_counter"] = 0;
-    mdata["last_claim_timestamp"] = time(0);
+    mdata["last_claim_timestamp"] = eosio::current_time_point().sec_since_epoch();
 
     // AND SAVE THE MUTABLE DATA IN THE NFT
     action(
@@ -80,7 +75,7 @@ void clashdomedst::updateorcs(uint32_t land_id, uint32_t dead_orcs) {
     require_auth(get_self());
 
     // TODO: ENCONTRAR TODOS LOS NFTS QUE CORRESPONDAN AL ID DEL TERRENO
-    // TODO: INCREMENTAR A TODOS LOS CAMPOS "partial_dead_orcs_counter", "total_dead_orcs_counter" y "games_played"
+    // TODO: INCREMENTAR A TODOS ESTOS CAMPOS "partial_dead_orcs_counter", "total_dead_orcs_counter" y "games_played"
 
     // TODO: HACER UNA TABLA QUE CONTENGA LA CANTIDAD DE ORCOS QUE MUEREN CADA DIA
     // TODO: INCREMENTAR LOS DE HOY Y HACER Q ESTA TABLA CONTENGA LOS ULTIMOS 30 DIAS BORRANDO UNA FILA SI ES NECESARIO

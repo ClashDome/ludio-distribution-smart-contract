@@ -11,9 +11,10 @@ type:				string [duels, tournament o both]
 rarity:				(Mythical, Legendary, Epic, Rare o Common)
 co-owners_amount:	uint8 (1, 10, 15, 25 or 35)
 editable:			boolean (false)
-about:				NFT description
+more_info:			NFT description
 artist:				ClashDome Studio
-link:				www.clashdome.io
+link_1:				www.clashdome.io
+link_2:             
 
 Mutable Attributes
 

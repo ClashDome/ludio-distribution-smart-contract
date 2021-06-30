@@ -27,13 +27,16 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
     atomicassets::ATTRIBUTE_MAP idata = atomicdata::deserialize(immutable_serialized_data, schema_itr->format);
     atomicassets::ATTRIBUTE_MAP mdata = atomicdata::deserialize(mutable_serialized_data, schema_itr->format);
 
-    uint8_t co_ownters_amount = get<uint8_t> (idata["co-owners_amount"]);
+    uint8_t co_owners_amount = get<uint8_t> (idata["co-owners_amount"]);
     uint64_t partial_dead_orcs_counter = get<uint64_t> (mdata["partial_dead_orcs_counter"]);
 
-    auto today_orcs_data_itr = killed_orcs.end() --;
-    uint16_t orcs_ludio_ratio = today_orcs_data_itr->orcs_ludio_ratio;
+    check(partial_dead_orcs_counter > 0, "Nothing to claim");
 
-    uint32_t killed_orcs_ludio_reward = (uint32_t) (partial_dead_orcs_counter / co_ownters_amount / orcs_ludio_ratio * 10000); 
+    // auto today_orcs_data_itr = killed_orcs.end() --;
+    // uint16_t orcs_ludio_ratio = today_orcs_data_itr->orcs_ludio_ratio;
+    uint16_t orcs_ludio_ratio = 25;
+
+    uint64_t killed_orcs_ludio_reward = (uint64_t) ((((float)partial_dead_orcs_counter / (float)co_owners_amount) / (float)orcs_ludio_ratio) * 10000.0); 
 
     // DAR EL LUDIO CORRESPONDIENTE
     asset ludio;
@@ -53,8 +56,8 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
     ).send();
 
     // CAMBIAR LOS PARAMETROS DEL NFT
-    mdata["partial_dead_orcs_counter"] = 0;
-    mdata["last_claim_timestamp"] = eosio::current_time_point().sec_since_epoch();
+    mdata["partial_dead_orcs_counter"] = (uint64_t) 0;
+    mdata["last_claim_timestamp"] = (uint64_t) eosio::current_time_point().sec_since_epoch();
 
     // AND SAVE THE MUTABLE DATA IN THE NFT
     action(

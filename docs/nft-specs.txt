@@ -18,7 +18,7 @@ link_2:
 
 Mutable Attributes
 
-games_played:			    uint64 total games played in that specific terrain
+matches_played:			    uint64 total matches played in that specific terrain
 total_dead_orcs_counter:	uint64 total amount of orcs killed in that terreain
 partial_dead_orcs_counter:	uint64 will be divided between the owners 
 last_claim_timestamp:		uint64 

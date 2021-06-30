@@ -14,13 +14,7 @@ make
 # Update contract
 
 While testing in testnet:
-cleos -u https://testnet.waxsweden.org set contract clashdomedst
- ./   clashdomedst
- -p    clashdomedst
-@active
+cleos -u https://testnet.waxsweden.org set contract clashdomedst ./clashdomedst -p clashdomedst@active
 
 In production:
-cleos -u https://api.waxsweden.org set contract clashdomedst
- ./   clashdomedst
- -p    clashdomedst
-@active
+cleos -u https://api.waxsweden.org set contract clashdomedst ./clashdomedst -p clashdomedst@active

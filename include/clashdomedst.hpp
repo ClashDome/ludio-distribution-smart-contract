@@ -18,9 +18,21 @@ public:
     using contract::contract;
 
     ACTION claimludio(name account, uint64_t asset_id, uint16_t game_id);
-    ACTION updateorcs(uint32_t land_id, uint32_t dead_orcs);
+    ACTION updateorcs(uint32_t orcs, uint32_t day);
+    ACTION clearorcs();
 
 private:
+
+    TABLE killed_orcs_s {
+        uint32_t day;
+        uint64_t killed_orcs;
+        uint16_t orcs_ludio_ratio;
+
+        uint64_t primary_key() const {return (uint64_t) day;}
+    };
+
+    typedef multi_index <name("orcs"), killed_orcs_s> killed_orcs_t;
+    killed_orcs_t killed_orcs = killed_orcs_t(get_self(), get_self().value); 
 
     const string GAME_NAMES[3] = {"Endless Siege", "Candy Fiesta", "Templok"};
 

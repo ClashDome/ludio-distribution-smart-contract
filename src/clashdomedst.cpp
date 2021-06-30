@@ -30,21 +30,10 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
     uint8_t co_ownters_amount = get<uint8_t> (idata["co-owners_amount"]);
     uint64_t partial_dead_orcs_counter = get<uint64_t> (mdata["partial_dead_orcs_counter"]);
 
-    // TODO: DETERMINAR LA CANTIDAD DE LUDIO QUE DA UN ORCO MUERTO
-    uint32_t yesterday = 20210630;
-    auto orcs_itr = killed_orcs.find(yesterday);
-    uint64_t yesterday_killed_orcs = orcs_itr-> killed_orcs;
-    float ludio_per_orc;
+    auto today_orcs_data_itr = killed_orcs.end() --;
+    uint16_t orcs_ludio_ratio = today_orcs_data_itr->orcs_ludio_ratio;
 
-    if (yesterday_killed_orcs < 1000000) {
-        ludio_per_orc  = 0.1f;
-    } else if (yesterday_killed_orcs < 10000000) {
-        ludio_per_orc  = 0.09f;
-    } else {
-        ludio_per_orc  = 0.08f;
-    }
-     
-    uint32_t killed_orcs_ludio_reward = (uint32_t) (partial_dead_orcs_counter / co_ownters_amount * ludio_per_orc * 10000); 
+    uint32_t killed_orcs_ludio_reward = (uint32_t) (partial_dead_orcs_counter / co_ownters_amount / orcs_ludio_ratio * 10000); 
 
     // DAR EL LUDIO CORRESPONDIENTE
     asset ludio;

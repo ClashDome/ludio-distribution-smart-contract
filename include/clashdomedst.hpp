@@ -23,16 +23,16 @@ public:
 
 private:
 
-    TABLE killed_orcs_s {
+    TABLE killedorcs_s {
         uint32_t day;
-        uint64_t killed_orcs;
+        uint64_t kills;
         uint16_t orcs_ludio_ratio;
 
         uint64_t primary_key() const {return (uint64_t) day;}
     };
 
-    typedef multi_index <name("orcs"), killed_orcs_s> killed_orcs_t;
-    killed_orcs_t killed_orcs = killed_orcs_t(get_self(), get_self().value); 
+    typedef multi_index <name("killedorcs"), killedorcs_s> killedorcs_t;
+    killedorcs_t killedorcs = killedorcs_t(get_self(), get_self().value); 
 
     const string GAME_NAMES[3] = {"Endless Siege", "Candy Fiesta", "Templok"};
 

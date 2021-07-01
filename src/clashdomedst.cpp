@@ -32,16 +32,16 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
 
     check(partial_dead_orcs_counter > 0, "Nothing to claim");
 
-    // auto today_orcs_data_itr = killed_orcs.end() --;
+    // auto today_orcs_data_itr = killedorcs.end()--;
     // uint16_t orcs_ludio_ratio = today_orcs_data_itr->orcs_ludio_ratio;
     uint16_t orcs_ludio_ratio = 25;
 
-    uint64_t killed_orcs_ludio_reward = (uint64_t) ((((float)partial_dead_orcs_counter / (float)co_owners_amount) / (float)orcs_ludio_ratio) * 10000.0); 
+    uint64_t killedorcs_ludio_reward = (uint64_t) ((((float)partial_dead_orcs_counter / (float)co_owners_amount) / (float)orcs_ludio_ratio) * 10000.0); 
 
     // DAR EL LUDIO CORRESPONDIENTE
     asset ludio;
     ludio.symbol = LUDIO_SYMBOL;
-    ludio.amount = killed_orcs_ludio_reward;
+    ludio.amount = killedorcs_ludio_reward;
 
     action(
         permission_level{get_self(), name("active")},
@@ -77,54 +77,54 @@ void clashdomedst::updateorcs(uint32_t orcs, uint32_t day) {
     
     require_auth(get_self());
 
-    auto orcs_itr = killed_orcs.find(day);
+    auto orcs_itr = killedorcs.find(day);
 
-    if (orcs_itr == killed_orcs.end()) {
+    if (orcs_itr == killedorcs.end()) {
 
         uint8_t size = 0;
         uint64_t total_orcs = 0;
 
-        for (auto itr = killed_orcs.begin(); itr != killed_orcs.end(); ++itr) {
+        for (auto itr = killedorcs.begin(); itr != killedorcs.end(); ++itr) {
             size ++;
-            total_orcs += itr->killed_orcs;
+            total_orcs += itr->kills;
         }
 
         if (size > 29) { 
-            killed_orcs.erase(killed_orcs.begin());
+            killedorcs.erase(killedorcs.begin());
         }
 
         uint16_t orcs_ludio_ratio = 25;
 
         if (size > 0) {
 
-            float killed_orcs_average = total_orcs / size;
+            float killedorcs_average = total_orcs / size;
 
-            if (killed_orcs_average > 1E8) {
+            if (killedorcs_average > 1E8) {
                 orcs_ludio_ratio = 150;
-            } else if (killed_orcs_average > 1E7) {
+            } else if (killedorcs_average > 1E7) {
                 orcs_ludio_ratio = 50;
             }
         } 
 
-        killed_orcs.emplace(get_self(), [&](auto &_orcs) {
+        killedorcs.emplace(get_self(), [&](auto &_orcs) {
             _orcs.day = day;
-            _orcs.killed_orcs = orcs;
+            _orcs.kills = orcs;
             _orcs.orcs_ludio_ratio = orcs_ludio_ratio;
         });
 
     } else {
 
-        killed_orcs.modify(orcs_itr, get_self(), [&](auto &_orcs) {
+        killedorcs.modify(orcs_itr, get_self(), [&](auto &_orcs) {
 
-            _orcs.killed_orcs += orcs;
+            _orcs.kills += orcs;
         });
     }
 }
 
 void clashdomedst::clearorcs() {
 
-    auto it = killed_orcs.begin();
-    while (it != killed_orcs.end()) {
-        it = killed_orcs.erase(it);
+    auto it = killedorcs.begin();
+    while (it != killedorcs.end()) {
+        it = killedorcs.erase(it);
     }
 }

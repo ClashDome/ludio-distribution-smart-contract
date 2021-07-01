@@ -42,6 +42,8 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
     ludio.symbol = LUDIO_SYMBOL;
     ludio.amount = killed_orcs_ludio_reward;
 
+    string land_name = get<string> (idata["name"]);
+
     action(
         permission_level{get_self(), name("active")},
         name("clashdometkn"),
@@ -50,7 +52,7 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
             get_self(),
             account,
             ludio,
-            GAME_NAMES[game_id] + " land owner reward" 
+            GAME_NAMES[game_id] + " land " + land_name + " owner reward" 
         )
     ).send();
 

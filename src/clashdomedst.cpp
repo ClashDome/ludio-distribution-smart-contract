@@ -32,16 +32,15 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
 
     check(partial_dead_orcs_counter > 0, "Nothing to claim");
 
-    // auto today_orcs_data_itr = killedorcs.end()--;
-    // uint16_t orcs_ludio_ratio = today_orcs_data_itr->orcs_ludio_ratio;
-    uint16_t orcs_ludio_ratio = 25;
+    auto today_orcs_data_itr = killedorcs.crbegin();
+    uint16_t orcs_ludio_ratio = today_orcs_data_itr->orcs_ludio_ratio;
 
-    uint64_t killedorcs_ludio_reward = (uint64_t) ((((float)partial_dead_orcs_counter / (float)co_owners_amount) / (float)orcs_ludio_ratio) * 10000.0); 
+    uint64_t killed_orcs_ludio_reward = (uint64_t) ((((float) partial_dead_orcs_counter / (float) co_owners_amount) / (float) orcs_ludio_ratio) * 10000.0); 
 
-    // DAR EL LUDIO CORRESPONDIENTE
+    // GIVE THE CORRESPONDING LUDIO
     asset ludio;
     ludio.symbol = LUDIO_SYMBOL;
-    ludio.amount = killedorcs_ludio_reward;
+    ludio.amount = killed_orcs_ludio_reward;
 
     action(
         permission_level{get_self(), name("active")},
@@ -55,11 +54,10 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
         )
     ).send();
 
-    // CAMBIAR LOS PARAMETROS DEL NFT
+    // CHANGE THE MUTABLE DATA IN THE NFT
     mdata["partial_dead_orcs_counter"] = (uint64_t) 0;
     mdata["last_claim_timestamp"] = (uint64_t) eosio::current_time_point().sec_since_epoch();
 
-    // AND SAVE THE MUTABLE DATA IN THE NFT
     action(
         permission_level{get_self(), name("active")},
         name("atomicassets"),
@@ -76,6 +74,11 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
 void clashdomedst::updateorcs(uint32_t orcs, uint32_t day) {
     
     require_auth(get_self());
+
+    // KILLED ORCS SECURITY TEST
+    if (orcs > 1E5) {
+        orcs = 1E5;
+    }
 
     auto orcs_itr = killedorcs.find(day);
 

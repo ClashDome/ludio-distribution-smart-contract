@@ -36,8 +36,8 @@ private:
 
     const string GAME_NAMES[3] = {"Endless Siege", "Candy Fiesta", "Templok"};
 
-    const string COLLECTION_NAME = "blcollection";
-    const string SCHEMA_NAME = "land3";
+    const string COLLECTION_NAME = "clashdomenft";
+    const string SCHEMA_NAME = "lands";
 
     static constexpr symbol LUDIO_SYMBOL = symbol(symbol_code("LUDIO"), 4);
 };

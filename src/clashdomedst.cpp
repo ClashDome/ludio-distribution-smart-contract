@@ -128,6 +128,8 @@ void clashdomedst::updateorcs(uint32_t orcs, uint32_t day) {
 
 void clashdomedst::clearorcs() {
 
+    require_auth(get_self());
+
     auto it = killedorcs.begin();
     while (it != killedorcs.end()) {
         it = killedorcs.erase(it);

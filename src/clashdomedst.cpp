@@ -14,7 +14,7 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
     check(asset_itr->collection_name == name(COLLECTION_NAME), "NFT doesn't correspond to " + COLLECTION_NAME);
     check(asset_itr->schema_name == name(SCHEMA_NAME), "NFT doesn't correspond to schema " + SCHEMA_NAME);
 
-    // VER CUANTOS ORCOS HAY EN EL CONTADOR PARCIAL
+    // CHECK HOW MANY ORCS ARE IN THE PARTIAL COUNTER
     atomicassets::schemas_t collection_schemas = atomicassets::get_schemas(name(COLLECTION_NAME));
     auto schema_itr = collection_schemas.find(name(SCHEMA_NAME).value);
 
@@ -37,7 +37,7 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
 
     uint64_t killed_orcs_ludio_reward = (uint64_t) ((((float) partial_dead_orcs_counter / (float) co_owners_amount) / (float) orcs_ludio_ratio) * 10000.0); 
 
-    // GIVE THE CORRESPONDING LUDIO
+    // REWARD THE CORRESPONDING LUDIO
     asset ludio;
     ludio.symbol = LUDIO_SYMBOL;
     ludio.amount = killed_orcs_ludio_reward;

@@ -73,25 +73,25 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
     ).send();
 }
 
-void clashdomedst::updateorcs(uint32_t orcs, uint32_t day) {
+void clashdomedst::updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uint32_t partial_orcs) {
     
     require_auth(get_self());
 
-    // KILLED ORCS SECURITY TEST
-    if (orcs > 1E5) {
-        orcs = 1E5;
-    }
-
     auto orcs_itr = killedorcs.find(day);
+
+    uint8_t size = 0;
 
     if (orcs_itr == killedorcs.end()) {
 
-        uint8_t size = 0;
-        uint64_t total_orcs = 0;
+        uint64_t total_killed_orcs = 0;
 
         for (auto itr = killedorcs.begin(); itr != killedorcs.end(); ++itr) {
+
             size ++;
-            total_orcs += itr->kills;
+
+            if (size <= 5) {
+                total_killed_orcs += itr->kills;
+            }
         }
 
         if (size > 29) { 
@@ -100,17 +100,14 @@ void clashdomedst::updateorcs(uint32_t orcs, uint32_t day) {
 
         uint16_t orcs_ludio_ratio = 25;
 
-        if (size > 0) {
+        float killed_orcs_average = total_killed_orcs / 5;
 
-            float killedorcs_average = total_orcs / size;
-
-            if (killedorcs_average > 1E8) {
-                orcs_ludio_ratio = 150;
-            } else if (killedorcs_average > 1E7) {
-                orcs_ludio_ratio = 50;
-            }
-        } 
-
+        if (killed_orcs_average > 1E8) {
+            orcs_ludio_ratio = 150;
+        } else if (killed_orcs_average > 1E7) {
+            orcs_ludio_ratio = 50;
+        }
+        
         killedorcs.emplace(get_self(), [&](auto &_orcs) {
             _orcs.day = day;
             _orcs.kills = orcs;
@@ -123,6 +120,24 @@ void clashdomedst::updateorcs(uint32_t orcs, uint32_t day) {
 
             _orcs.kills += orcs;
         });
+    }
+
+    // TODO: UPDATE THE TABLE WITH THE LAST PLAYED LANDS
+    last_lands.emplace(get_self(), [&](auto &_land) {
+        _land.land_id = land_id;
+        _land.partial_orcs = partial_orcs;
+        _land.timestamp = (uint64_t) eosio::current_time_point().sec_since_epoch();
+    });
+
+    size = 0;
+
+    for (auto itr = last_lands.begin(); itr != last_lands.end(); ++itr) {
+
+        size ++;
+    }
+
+    if (size > 50) { 
+        last_lands.erase(last_lands.begin());
     }
 }
 

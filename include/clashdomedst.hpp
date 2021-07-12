@@ -18,10 +18,21 @@ public:
     using contract::contract;
 
     ACTION claimludio(name account, uint64_t asset_id, uint16_t game_id);
-    ACTION updateorcs(uint32_t orcs, uint32_t day);
+    ACTION updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uint32_t partial_orcs);
     ACTION clearorcs();
 
 private:
+
+    TABLE last_lands_s {
+        uint16_t land_id;
+        uint64_t partial_orcs;
+        uint64_t timestamp;
+
+        uint64_t primary_key() const {return (uint64_t) land_id;}
+    };
+
+    typedef multi_index <name("lastlands"), last_lands_s> last_lands_t;
+    last_lands_t last_lands = last_lands_t(get_self(), get_self().value); 
 
     TABLE killedorcs_s {
         uint32_t day;

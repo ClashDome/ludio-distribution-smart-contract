@@ -123,21 +123,21 @@ void clashdomedst::updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uin
     }
 
     // TODO: UPDATE THE TABLE WITH THE LAST PLAYED LANDS
-    last_lands.emplace(get_self(), [&](auto &_land) {
-        _land.land_id = land_id;
-        _land.partial_orcs = partial_orcs;
-        _land.timestamp = (uint64_t) eosio::current_time_point().sec_since_epoch();
+    landactivity.emplace(get_self(), [&](auto &_land_data) {
+        _land_data.timestamp = (uint64_t) eosio::current_time_point().sec_since_epoch();
+        _land_data.land_id = land_id;
+        _land_data.partial_orcs = partial_orcs;
     });
 
     size = 0;
 
-    for (auto itr = last_lands.begin(); itr != last_lands.end(); ++itr) {
+    for (auto itr = landactivity.begin(); itr != landactivity.end(); ++itr) {
 
         size ++;
     }
 
     if (size > 50) { 
-        last_lands.erase(last_lands.begin());
+        landactivity.erase(landactivity.begin());
     }
 }
 
@@ -148,5 +148,15 @@ void clashdomedst::clearorcs() {
     auto it = killedorcs.begin();
     while (it != killedorcs.end()) {
         it = killedorcs.erase(it);
+    }
+}
+
+void clashdomedst::clearlands() {
+
+    require_auth(get_self());
+
+    auto it = last_lands.begin();
+    while (it != last_lands.end()) {
+        it = last_lands.erase(it);
     }
 }

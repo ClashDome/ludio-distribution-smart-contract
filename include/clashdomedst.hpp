@@ -20,6 +20,7 @@ public:
     ACTION claimludio(name account, uint64_t asset_id, uint16_t game_id);
     ACTION updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uint32_t partial_orcs);
     ACTION clearorcs();
+    ACTION clearlands();
 
 private:
 
@@ -33,6 +34,19 @@ private:
 
     typedef multi_index <name("lastlands"), last_lands_s> last_lands_t;
     last_lands_t last_lands = last_lands_t(get_self(), get_self().value); 
+
+
+    // NEW
+    TABLE landactivity_s {
+        uint64_t timestamp;
+        uint16_t land_id;
+        uint64_t partial_orcs;
+    
+        uint64_t primary_key() const {return timestamp;}
+    };
+
+    typedef multi_index <name("landactivity"), landactivity_s> landactivity_t;
+    landactivity_t landactivity = landactivity_t(get_self(), get_self().value); 
 
     TABLE killedorcs_s {
         uint32_t day;

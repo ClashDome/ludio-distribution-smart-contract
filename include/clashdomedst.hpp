@@ -24,19 +24,6 @@ public:
 
 private:
 
-    TABLE last_lands_s {
-        uint16_t land_id;
-        uint64_t partial_orcs;
-        uint64_t timestamp;
-
-        uint64_t primary_key() const {return (uint64_t) land_id;}
-    };
-
-    typedef multi_index <name("lastlands"), last_lands_s> last_lands_t;
-    last_lands_t last_lands = last_lands_t(get_self(), get_self().value); 
-
-
-    // NEW
     TABLE landactivity_s {
         uint64_t timestamp;
         uint16_t land_id;

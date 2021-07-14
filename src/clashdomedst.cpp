@@ -204,11 +204,7 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
 
     require_auth(from);
 
-    if (from == _self) {
-        return;
-    }
-
-    if (to != _self) {
+    if (from == _self || to != _self) {
         return;
     }
 
@@ -217,6 +213,8 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
     check(quantity.amount > 0, "only positive quantity allowed");
     check(quantity.amount >= NFT_PRICE, "not enough LUDIO to complete the transaction");
     check(quantity.symbol == LUDIO_SYMBOL, "only LUDIO tokens allowed");
+
+    // TODO: USAR EL MEMO
 
     // CHECK IF ACCOUNT IS WHITELISTED
     bool whitelisted = false;
@@ -244,4 +242,36 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
     check(whitelisted, "account is not whitelisted");
 
     // MINT THE NFT
+
+    action(
+        permission_level{get_self(), name("active")},
+        atomicassets::ATOMICASSETS_ACCOUNT,
+        name("mintasset"),
+        make_tuple(
+            get_self(),
+            "clashdomenft",
+            "gamedata",
+            82326,
+            from,
+            (atomicassets::ATTRIBUTE_MAP) {},
+            (atomicassets::ATTRIBUTE_MAP) {},
+            (vector <asset>) {}
+        )
+    ).send();
+    
+    // action(
+    //     permission_level{get_self(), name("active")},
+    //     atomicassets::ATOMICASSETS_ACCOUNT,
+    //     name("mintasset"),
+    //     make_tuple(
+    //         get_self(),
+    //         pack_itr->collection_name,
+    //         template_itr->schema_name,
+    //         template_itr->template_id,
+    //         unboxpack_itr->unboxer,
+    //         (atomicassets::ATTRIBUTE_MAP) {},
+    //         (atomicassets::ATTRIBUTE_MAP) {},
+    //         (vector <asset>) {}
+    //     )
+    // ).send();
 }

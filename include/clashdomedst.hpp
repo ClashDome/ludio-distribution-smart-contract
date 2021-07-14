@@ -22,6 +22,11 @@ public:
     ACTION clearorcs();
     ACTION clearlands();
 
+    ACTION addtowl(vector <name> accounts_to_add);
+    ACTION clearwl();
+
+    [[eosio::on_notify("clashdometkn::transfer")]] void transfer(const name &from, const name &to, const asset &quantity, const string &memo);
+
 private:
 
     TABLE landactivity_s {
@@ -52,4 +57,17 @@ private:
     const string SCHEMA_NAME = "lands";
 
     static constexpr symbol LUDIO_SYMBOL = symbol(symbol_code("LUDIO"), 4);
+
+    const uint32_t NFT_PRICE = 5; // PRICE IN LUDIO MULTIPLIED BY 1E4
+
+    TABLE whitelists_s {
+    
+        uint64_t id;
+        vector<name> whitelist;
+
+        uint64_t primary_key() const {return  id;}
+    };
+
+    typedef multi_index <name("whitelists"), whitelists_s> whitelists_t;
+    whitelists_t whitelists = whitelists_t(get_self(), get_self().value); 
 };

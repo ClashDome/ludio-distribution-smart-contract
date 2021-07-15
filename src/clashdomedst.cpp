@@ -210,12 +210,11 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
 
     // CHECK IF IS IT A VALID LUDIO PAYMENT
     check(quantity.symbol.is_valid(), "invalid quantity");
-    check(quantity.amount > 0, "only positive quantity allowed");
     check(quantity.amount >= NFT_PRICE, "not enough LUDIO to complete the transaction");
     check(quantity.symbol == LUDIO_SYMBOL, "only LUDIO tokens allowed");
 
-    // TODO: USAR EL MEMO POR QUE A CUALQUIERA Q MANDE ESA CANTIDAD DE LUDIO A 
-    // clashdomedst SE LE MINTARA UN NFT
+    // CHECK THE MEMO
+    check(memo == "early access NFT", "wrong memo");
 
     // CHECK IF ACCOUNT IS WHITELISTED
     bool whitelisted = false;
@@ -240,7 +239,7 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
         }
     }
 
-    check(whitelisted, "account is not whitelisted");
+    check(whitelisted, "account is not whitelisted or has already purchased an NFT");
 
     // MINT THE NFT
 
@@ -248,10 +247,10 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
         permission_level{get_self(), name("active")},
         name("atomicassets"),
         name("mintasset"),
-        make_tuple(
+        std::make_tuple(
             get_self(),
-            "clashdomenft",
-            "gamedata",
+            name("clashdomenft"),
+            name("gamedata"),
             82326,
             from,
             (atomicassets::ATTRIBUTE_MAP) {},
@@ -260,4 +259,3 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
         )
     ).send();
 }
-

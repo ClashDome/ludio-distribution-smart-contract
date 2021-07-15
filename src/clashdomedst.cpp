@@ -159,3 +159,103 @@ void clashdomedst::clearlands() {
         it = landactivity.erase(it);
     }
 }
+
+void clashdomedst::addtowl(vector <name> accounts_to_add) {
+
+    require_auth(get_self());
+
+    // TODO: CHECK IF ACCOUNTS ARE DUPLICATED AND VALID 
+    
+    auto wl_itr = whitelists.begin();
+
+    if (wl_itr == whitelists.end()) {
+
+        whitelists.emplace(get_self(), [&](auto &_wl) {
+            _wl.id = 1;
+            _wl.whitelist = accounts_to_add;
+        });
+
+    } else {
+
+        vector<name> whitelist = wl_itr->whitelist;
+
+        for (auto accounts_itr = accounts_to_add.begin(); accounts_itr < accounts_to_add.end(); accounts_itr ++) {
+            whitelist.push_back(*accounts_itr);
+        }
+
+        whitelists.modify(wl_itr, get_self(), [&](auto &_wl) {
+
+            _wl.whitelist = whitelist;
+        });
+    }   
+}
+
+void clashdomedst::clearwl() {
+    
+    require_auth(get_self());
+
+    auto it = whitelists.begin();
+    while (it != whitelists.end()) {
+        it = whitelists.erase(it);
+    }
+}
+
+void clashdomedst::transfer(const name &from, const name &to, const asset &quantity, const string &memo) {
+
+    require_auth(from);
+
+    if (from == _self || to != _self) {
+        return;
+    }
+
+    // CHECK IF IS IT A VALID LUDIO PAYMENT
+    check(quantity.symbol.is_valid(), "invalid quantity");
+    check(quantity.amount >= NFT_PRICE, "not enough LUDIO to complete the transaction");
+    check(quantity.symbol == LUDIO_SYMBOL, "only LUDIO tokens allowed");
+
+    // CHECK THE MEMO
+    check(memo == "early access NFT", "wrong memo");
+
+    // CHECK IF ACCOUNT IS WHITELISTED
+    bool whitelisted = false;
+
+    auto wl_itr = whitelists.begin();
+    vector<name> whitelist = wl_itr->whitelist;
+
+    for (auto it = whitelist.begin(); it != whitelist.end(); ++it) {
+
+        if (*it == from) {
+
+            whitelisted = true;
+
+            // REMOVE IT FROM THE WHITELIST
+            whitelist.erase(it);
+
+            whitelists.modify(wl_itr, get_self(), [&](auto &_wl) {
+                _wl.whitelist = whitelist;
+            });
+
+            break;
+        }
+    }
+
+    check(whitelisted, "account is not whitelisted or has already purchased an NFT");
+
+    // MINT THE NFT
+
+    action (
+        permission_level{get_self(), name("active")},
+        name("atomicassets"),
+        name("mintasset"),
+        std::make_tuple(
+            get_self(),
+            name("clashdomenft"),
+            name("gamedata"),
+            82326,
+            from,
+            (atomicassets::ATTRIBUTE_MAP) {},
+            (atomicassets::ATTRIBUTE_MAP) {},
+            (vector <asset>) {}
+        )
+    ).send();
+}

@@ -200,6 +200,27 @@ void clashdomedst::clearwl() {
     }
 }
 
+void clashdomedst::setnftsold(uint32_t n) {
+
+    require_auth(get_self());
+
+    auto nftsold_itr = nftsold.begin();
+
+    if (nftsold_itr == nftsold.end()) {
+
+        nftsold.emplace(get_self(), [&](auto &_nftsold) {
+            _nftsold.id = 1;
+            _nftsold.n = n;
+        });
+
+    } else {
+
+        nftsold.modify(nftsold_itr, get_self(), [&](auto &_nftsold) {
+            _nftsold.n = n;
+        });
+    }
+}
+
 void clashdomedst::transfer(const name &from, const name &to, const asset &quantity, const string &memo) {
 
     require_auth(from);
@@ -215,6 +236,12 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
 
     // CHECK THE MEMO
     check(memo == "early access NFT", "wrong memo");
+
+    // CHECK NUM NFT SOLD
+    auto nftsold_itr = nftsold.begin();
+    uint32_t nfts_sold = nftsold_itr->n;
+
+    check(nfts_sold <= NFT_MAX_SUPPLY, "NFT sold out");
 
     // CHECK IF ACCOUNT IS WHITELISTED
     bool whitelisted = false;
@@ -241,17 +268,20 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
 
     check(whitelisted, "account is not whitelisted or has already purchased an NFT");
 
-    // MINT THE NFT
+    nftsold.modify(nftsold_itr, get_self(), [&](auto &_nftsold) {
+        _nftsold.n = nfts_sold + 1;
+    });
 
+    // MINT THE NFT
     action (
         permission_level{get_self(), name("active")},
         name("atomicassets"),
         name("mintasset"),
         std::make_tuple(
             get_self(),
-            name("clashdomenft"),
-            name("gamedata"),
-            82326,
+            name(COLLECTION_NAME),
+            name(EARLY_ACCESS_SCHEMA_NAME),
+            EARLY_ACCESS_TEMPLATE_ID,
             from,
             (atomicassets::ATTRIBUTE_MAP) {},
             (atomicassets::ATTRIBUTE_MAP) {},

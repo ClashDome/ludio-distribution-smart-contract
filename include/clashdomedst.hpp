@@ -24,6 +24,7 @@ public:
 
     ACTION addtowl(vector <name> accounts_to_add);
     ACTION clearwl();
+    ACTION setnftsold(uint32_t n);
 
     [[eosio::on_notify("clashdometkn::transfer")]] void transfer(const name &from, const name &to, const asset &quantity, const string &memo);
 
@@ -58,7 +59,12 @@ private:
 
     static constexpr symbol LUDIO_SYMBOL = symbol(symbol_code("LUDIO"), 4);
 
+    // EARLY ACCESS NFT
     const uint32_t NFT_PRICE = 5; // PRICE IN LUDIO MULTIPLIED BY 1E4
+    const uint32_t NFT_MAX_SUPPLY = 250;
+
+    const string EARLY_ACCESS_SCHEMA_NAME = "gamedata";
+    const uint32_t EARLY_ACCESS_TEMPLATE_ID = 82326;
 
     TABLE whitelists_s {
     
@@ -70,4 +76,15 @@ private:
 
     typedef multi_index <name("whitelists"), whitelists_s> whitelists_t;
     whitelists_t whitelists = whitelists_t(get_self(), get_self().value); 
+
+    TABLE nftsold_s {
+    
+        uint64_t id;
+        uint32_t n;
+
+        uint64_t primary_key() const {return  id;}
+    };
+
+    typedef multi_index <name("nftsold"), nftsold_s> nftsold_t;
+    nftsold_t nftsold = nftsold_t(get_self(), get_self().value); 
 };

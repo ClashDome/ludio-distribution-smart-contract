@@ -214,7 +214,8 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
     check(quantity.amount >= NFT_PRICE, "not enough LUDIO to complete the transaction");
     check(quantity.symbol == LUDIO_SYMBOL, "only LUDIO tokens allowed");
 
-    // TODO: USAR EL MEMO
+    // TODO: USAR EL MEMO POR QUE A CUALQUIERA Q MANDE ESA CANTIDAD DE LUDIO A 
+    // clashdomedst SE LE MINTARA UN NFT
 
     // CHECK IF ACCOUNT IS WHITELISTED
     bool whitelisted = false;
@@ -243,9 +244,9 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
 
     // MINT THE NFT
 
-    action(
+    action (
         permission_level{get_self(), name("active")},
-        atomicassets::ATOMICASSETS_ACCOUNT,
+        name("atomicassets"),
         name("mintasset"),
         make_tuple(
             get_self(),
@@ -258,20 +259,5 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
             (vector <asset>) {}
         )
     ).send();
-    
-    // action(
-    //     permission_level{get_self(), name("active")},
-    //     atomicassets::ATOMICASSETS_ACCOUNT,
-    //     name("mintasset"),
-    //     make_tuple(
-    //         get_self(),
-    //         pack_itr->collection_name,
-    //         template_itr->schema_name,
-    //         template_itr->template_id,
-    //         unboxpack_itr->unboxer,
-    //         (atomicassets::ATTRIBUTE_MAP) {},
-    //         (atomicassets::ATTRIBUTE_MAP) {},
-    //         (vector <asset>) {}
-    //     )
-    // ).send();
 }
+

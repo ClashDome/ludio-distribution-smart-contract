@@ -60,7 +60,9 @@ private:
     static constexpr symbol LUDIO_SYMBOL = symbol(symbol_code("LUDIO"), 4);
 
     // EARLY ACCESS NFT
-    const uint32_t NFT_PRICE = 5; // PRICE IN LUDIO MULTIPLIED BY 1E4
+    // const uint64_t SALE_TIME = 1626969600; // Thursday, 22. July 2021 16:00:00
+    const uint64_t SALE_TIME = 1626616627; // WHILE TESTING
+    const uint32_t NFT_PRICE = 50000; // CHANGE TO 50000000 -> 5K LUDIO
     const uint32_t NFT_MAX_SUPPLY = 250;
 
     const string EARLY_ACCESS_SCHEMA_NAME = "gamedata";

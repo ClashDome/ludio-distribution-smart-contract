@@ -300,7 +300,7 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
 
         } else {
 
-            check(timestamp - opensale_itr->timestamp > 3600, "only 1 NFT per hour can be purchased");
+            check(timestamp - opensale_itr->timestamp > 600, "only 1 NFT allowed, 10 minuntes cooldown");
 
             opensale.modify(opensale_itr, get_self(), [&](auto &_sale_data) {
                 _sale_data.timestamp = timestamp;

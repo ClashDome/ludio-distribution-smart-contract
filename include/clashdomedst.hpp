@@ -68,7 +68,7 @@ private:
 
     const string EARLY_ACCESS_SCHEMA_NAME = "gamedata";
     const uint32_t EARLY_ACCESS_TEMPLATE_ID = 82326;
-    const bool WHITELISTED_SALE = false;
+    const bool WHITELISTED_SALE = true;
 
     TABLE whitelists_s {
     

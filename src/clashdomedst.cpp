@@ -200,6 +200,16 @@ void clashdomedst::clearwl() {
     }
 }
 
+void clashdomedst::clearopensale() {
+    
+    require_auth(get_self());
+
+    auto it = opensale.begin();
+    while (it != opensale.end()) {
+        it = opensale.erase(it);
+    }
+}
+
 void clashdomedst::setnftsold(uint32_t n) {
 
     require_auth(get_self());
@@ -248,30 +258,56 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
 
     check(nfts_sold <= NFT_MAX_SUPPLY, "NFT sold out");
 
-    // CHECK IF ACCOUNT IS WHITELISTED
-    bool whitelisted = false;
+    if (WHITELISTED_SALE) {
 
-    auto wl_itr = whitelists.begin();
-    vector<name> whitelist = wl_itr->whitelist;
+        // CHECK IF ACCOUNT IS WHITELISTED
+        bool whitelisted = false;
 
-    for (auto it = whitelist.begin(); it != whitelist.end(); ++it) {
+        auto wl_itr = whitelists.begin();
+        vector<name> whitelist = wl_itr->whitelist;
 
-        if (*it == from) {
+        for (auto it = whitelist.begin(); it != whitelist.end(); ++it) {
 
-            whitelisted = true;
+            if (*it == from) {
 
-            // REMOVE IT FROM THE WHITELIST
-            whitelist.erase(it);
+                whitelisted = true;
 
-            whitelists.modify(wl_itr, get_self(), [&](auto &_wl) {
-                _wl.whitelist = whitelist;
+                // REMOVE IT FROM THE WHITELIST
+                whitelist.erase(it);
+
+                 whitelists.modify(wl_itr, get_self(), [&](auto &_wl) {
+                    _wl.whitelist = whitelist;
+                });
+
+                break; 
+            }
+        }
+
+        check(whitelisted, "account is not whitelisted or has already purchased an NFT");
+
+    } else {
+
+        uint64_t timestamp = (uint64_t) eosio::current_time_point().sec_since_epoch();
+
+        auto opensale_itr = opensale.find(from.value);
+
+        if (opensale_itr == opensale.end()) {
+
+            opensale.emplace(get_self(), [&](auto &_sale_data) {
+                _sale_data.account_value = from.value;
+                _sale_data.timestamp = timestamp;
             });
 
-            break;
+        } else {
+
+            check(timestamp - opensale_itr->timestamp > 600, "only 1 NFT allowed, 10 minuntes cooldown");
+
+            opensale.modify(opensale_itr, get_self(), [&](auto &_sale_data) {
+                _sale_data.timestamp = timestamp;
+            });
         }
     }
-
-    check(whitelisted, "account is not whitelisted or has already purchased an NFT");
+   
 
     nftsold.modify(nftsold_itr, get_self(), [&](auto &_nftsold) {
         _nftsold.n = nfts_sold + 1;

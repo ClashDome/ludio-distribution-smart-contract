@@ -21,6 +21,7 @@ public:
     ACTION updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uint32_t partial_orcs);
     ACTION clearorcs();
     ACTION clearlands();
+    ACTION clearopensale();
 
     ACTION addtowl(vector <name> accounts_to_add);
     ACTION clearwl();
@@ -68,6 +69,7 @@ private:
     const string EARLY_ACCESS_COLLECTION_NAME = "clashdomenft";
     const string EARLY_ACCESS_SCHEMA_NAME = "vip";
     const uint32_t EARLY_ACCESS_TEMPLATE_ID = 230544;
+    const bool WHITELISTED_SALE = true;
 
     TABLE whitelists_s {
     
@@ -90,4 +92,15 @@ private:
 
     typedef multi_index <name("nftsold"), nftsold_s> nftsold_t;
     nftsold_t nftsold = nftsold_t(get_self(), get_self().value); 
+
+    TABLE opensale_s {
+    
+        uint64_t account_value;
+        uint64_t timestamp;
+
+        uint64_t primary_key() const {return account_value;}
+    };
+
+    typedef multi_index <name("opensale"), opensale_s> opensale_t;
+    opensale_t opensale = opensale_t(get_self(), get_self().value); 
 };

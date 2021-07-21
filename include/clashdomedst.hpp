@@ -60,13 +60,14 @@ private:
     static constexpr symbol LUDIO_SYMBOL = symbol(symbol_code("LUDIO"), 4);
 
     // EARLY ACCESS NFT
-    // const uint64_t SALE_TIME = 1626969600; // Thursday, 22. July 2021 16:00:00
-    const uint64_t SALE_TIME = 1626616627; // WHILE TESTING
-    const uint32_t NFT_PRICE = 50000; // CHANGE TO 50000000 -> 5K LUDIO
+    const uint64_t SALE_TIME = 1626969600; // Thursday, 22. July 2021 16:00:00
+    // const uint64_t SALE_TIME = 1626787800; // WHILE TESTING
+    const uint32_t NFT_PRICE = 50000000; // CHANGE TO 50000000 -> 5K LUDIO
     const uint32_t NFT_MAX_SUPPLY = 250;
 
-    const string EARLY_ACCESS_SCHEMA_NAME = "gamedata";
-    const uint32_t EARLY_ACCESS_TEMPLATE_ID = 82326;
+    const string EARLY_ACCESS_COLLECTION_NAME = "clashdomenft";
+    const string EARLY_ACCESS_SCHEMA_NAME = "vip";
+    const uint32_t EARLY_ACCESS_TEMPLATE_ID = 230544;
 
     TABLE whitelists_s {
     

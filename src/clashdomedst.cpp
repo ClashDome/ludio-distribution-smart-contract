@@ -246,7 +246,7 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
     auto nftsold_itr = nftsold.begin();
     uint32_t nfts_sold = nftsold_itr->n;
 
-    check(nfts_sold <= NFT_MAX_SUPPLY, "NFT sold out");
+    check(nfts_sold < NFT_MAX_SUPPLY, "NFT sold out");
 
     // CHECK IF ACCOUNT IS WHITELISTED
     bool whitelisted = false;
@@ -284,7 +284,7 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
         name("mintasset"),
         std::make_tuple(
             get_self(),
-            name(COLLECTION_NAME),
+            name(EARLY_ACCESS_COLLECTION_NAME),
             name(EARLY_ACCESS_SCHEMA_NAME),
             EARLY_ACCESS_TEMPLATE_ID,
             from,

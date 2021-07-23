@@ -62,7 +62,6 @@ private:
 
     // EARLY ACCESS NFT
     const uint64_t SALE_TIME = 1626969600; // Thursday, 22. July 2021 16:00:00
-    // const uint64_t SALE_TIME = 1626787800; // WHILE TESTING
     const uint32_t NFT_PRICE = 50000000; // CHANGE TO 50000000 -> 5K LUDIO
     const uint32_t NFT_MAX_SUPPLY = 250;
 

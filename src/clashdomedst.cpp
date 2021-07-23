@@ -239,94 +239,93 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
         return;
     }
 
-    // CHECK IF THE SALE IS OPEN
-    uint64_t timestamp = (uint64_t) eosio::current_time_point().sec_since_epoch();
+    if (memo == "early access NFT") {
 
-    check(timestamp > SALE_TIME, "the sale is not open yet");
-
-    // CHECK IF IS IT A VALID LUDIO PAYMENT
-    check(quantity.symbol.is_valid(), "invalid quantity");
-    check(quantity.amount >= NFT_PRICE, "not enough LUDIO to complete the transaction");
-    check(quantity.symbol == LUDIO_SYMBOL, "only LUDIO tokens allowed");
-
-    // CHECK THE MEMO
-    check(memo == "early access NFT", "wrong memo");
-
-    // CHECK NUM NFT SOLD
-    auto nftsold_itr = nftsold.begin();
-    uint32_t nfts_sold = nftsold_itr->n;
-
-    check(nfts_sold < NFT_MAX_SUPPLY, "NFT sold out");
-
-    if (WHITELISTED_SALE) {
-
-        // CHECK IF ACCOUNT IS WHITELISTED
-        bool whitelisted = false;
-
-        auto wl_itr = whitelists.begin();
-        vector<name> whitelist = wl_itr->whitelist;
-
-        for (auto it = whitelist.begin(); it != whitelist.end(); ++it) {
-
-            if (*it == from) {
-
-                whitelisted = true;
-
-                // REMOVE IT FROM THE WHITELIST
-                whitelist.erase(it);
-
-                 whitelists.modify(wl_itr, get_self(), [&](auto &_wl) {
-                    _wl.whitelist = whitelist;
-                });
-
-                break; 
-            }
-        }
-
-        check(whitelisted, "account is not whitelisted or has already purchased an NFT");
-
-    } else {
-
+        // CHECK IF THE SALE IS OPEN
         uint64_t timestamp = (uint64_t) eosio::current_time_point().sec_since_epoch();
 
-        auto opensale_itr = opensale.find(from.value);
+        check(timestamp > SALE_TIME, "the sale is not open yet");
 
-        if (opensale_itr == opensale.end()) {
+        // CHECK IF IS IT A VALID LUDIO PAYMENT
+        check(quantity.symbol.is_valid(), "invalid quantity");
+        check(quantity.amount >= NFT_PRICE, "not enough LUDIO to complete the transaction");
+        check(quantity.symbol == LUDIO_SYMBOL, "only LUDIO tokens allowed");
 
-            opensale.emplace(get_self(), [&](auto &_sale_data) {
-                _sale_data.account_value = from.value;
-                _sale_data.timestamp = timestamp;
-            });
+        // CHECK NUM NFT SOLD
+        auto nftsold_itr = nftsold.begin();
+        uint32_t nfts_sold = nftsold_itr->n;
+
+        check(nfts_sold < NFT_MAX_SUPPLY, "NFT sold out");
+
+        if (WHITELISTED_SALE) {
+
+            // CHECK IF ACCOUNT IS WHITELISTED
+            bool whitelisted = false;
+
+            auto wl_itr = whitelists.begin();
+            vector<name> whitelist = wl_itr->whitelist;
+
+            for (auto it = whitelist.begin(); it != whitelist.end(); ++it) {
+
+                if (*it == from) {
+
+                    whitelisted = true;
+
+                    // REMOVE IT FROM THE WHITELIST
+                    whitelist.erase(it);
+
+                    whitelists.modify(wl_itr, get_self(), [&](auto &_wl) {
+                        _wl.whitelist = whitelist;
+                    });
+
+                    break; 
+                }
+            }
+
+            check(whitelisted, "account is not whitelisted or has already purchased an NFT");
 
         } else {
 
-            check(timestamp - opensale_itr->timestamp > 600, "only 1 NFT allowed, 10 minuntes cooldown");
+            uint64_t timestamp = (uint64_t) eosio::current_time_point().sec_since_epoch();
 
-            opensale.modify(opensale_itr, get_self(), [&](auto &_sale_data) {
-                _sale_data.timestamp = timestamp;
-            });
+            auto opensale_itr = opensale.find(from.value);
+
+            if (opensale_itr == opensale.end()) {
+
+                opensale.emplace(get_self(), [&](auto &_sale_data) {
+                    _sale_data.account_value = from.value;
+                    _sale_data.timestamp = timestamp;
+                });
+
+            } else {
+
+                check(timestamp - opensale_itr->timestamp > 600, "only 1 NFT allowed, 10 minuntes cooldown");
+
+                opensale.modify(opensale_itr, get_self(), [&](auto &_sale_data) {
+                    _sale_data.timestamp = timestamp;
+                });
+            }
         }
-    }
    
+        nftsold.modify(nftsold_itr, get_self(), [&](auto &_nftsold) {
+            _nftsold.n = nfts_sold + 1;
+        });
 
-    nftsold.modify(nftsold_itr, get_self(), [&](auto &_nftsold) {
-        _nftsold.n = nfts_sold + 1;
-    });
-
-    // MINT THE NFT
-    action (
-        permission_level{get_self(), name("active")},
-        name("atomicassets"),
-        name("mintasset"),
-        std::make_tuple(
-            get_self(),
-            name(EARLY_ACCESS_COLLECTION_NAME),
-            name(EARLY_ACCESS_SCHEMA_NAME),
-            EARLY_ACCESS_TEMPLATE_ID,
-            from,
-            (atomicassets::ATTRIBUTE_MAP) {},
-            (atomicassets::ATTRIBUTE_MAP) {},
-            (vector <asset>) {}
-        )
-    ).send();
+        // MINT THE NFT
+        action (
+            permission_level{get_self(), name("active")},
+            name("atomicassets"),
+            name("mintasset"),
+            std::make_tuple(
+                get_self(),
+                name(EARLY_ACCESS_COLLECTION_NAME),
+                name(EARLY_ACCESS_SCHEMA_NAME),
+                EARLY_ACCESS_TEMPLATE_ID,
+                from,
+                (atomicassets::ATTRIBUTE_MAP) {},
+                (atomicassets::ATTRIBUTE_MAP) {},
+                (vector <asset>) {}
+            )
+        ).send();
+    }
 }

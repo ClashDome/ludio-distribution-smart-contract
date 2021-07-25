@@ -239,18 +239,19 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
         return;
     }
 
+    // CHECK IF IS IT A VALID LUDIO PAYMENT
+    check(quantity.symbol.is_valid(), "invalid quantity");
+    check(quantity.symbol == LUDIO_SYMBOL, "only LUDIO tokens allowed");
+    check(quantity.amount > 0, "only positive LUDIO transfer allowed");
+
     if (memo == "early access NFT") {
 
         // CHECK IF THE SALE IS OPEN
         uint64_t timestamp = (uint64_t) eosio::current_time_point().sec_since_epoch();
 
-        check(timestamp > SALE_TIME, "the sale is not open yet");
-
-        // CHECK IF IS IT A VALID LUDIO PAYMENT
-        check(quantity.symbol.is_valid(), "invalid quantity");
+        check(timestamp > SALE_TIME, "the sale is not open yet");  
         check(quantity.amount >= NFT_PRICE, "not enough LUDIO to complete the transaction");
-        check(quantity.symbol == LUDIO_SYMBOL, "only LUDIO tokens allowed");
-
+       
         // CHECK NUM NFT SOLD
         auto nftsold_itr = nftsold.begin();
         uint32_t nfts_sold = nftsold_itr->n;

@@ -98,14 +98,27 @@ void clashdomedst::updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uin
             killedorcs.erase(killedorcs.begin());
         }
 
-        uint16_t orcs_ludio_ratio = 25;
+        uint16_t orcs_ludio_ratio;
 
         float killed_orcs_average = total_killed_orcs / 5;
 
-        if (killed_orcs_average > 1E8) {
-            orcs_ludio_ratio = 150;
-        } else if (killed_orcs_average > 1E7) {
-            orcs_ludio_ratio = 50;
+        if (killed_orcs_average < 750000) {
+            orcs_ludio_ratio = 25;
+        } else {
+
+            float f;
+
+            if (killed_orcs_average < 5E6) {
+                f = 0.85;
+            } else if (killed_orcs_average < 1E7) {
+                f = 0.75;
+            } else if (killed_orcs_average < 1E8) {
+                f = 0.65;
+            } else {
+                f = 0.5;
+            }
+
+            orcs_ludio_ratio = (uint16_t) (killed_orcs_average / 750000 * 25 * f);
         }
         
         killedorcs.emplace(get_self(), [&](auto &_orcs) {
@@ -117,7 +130,6 @@ void clashdomedst::updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uin
     } else {
 
         killedorcs.modify(orcs_itr, get_self(), [&](auto &_orcs) {
-
             _orcs.kills += orcs;
         });
     }

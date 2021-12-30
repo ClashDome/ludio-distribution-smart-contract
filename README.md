@@ -1,4 +1,4 @@
-LUDIO distribution smart contracts
+This contract distributes LUDIO among Endless Siege land owners.
 
 # Build
 

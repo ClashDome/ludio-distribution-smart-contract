@@ -71,6 +71,10 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
             mdata
         )
     ).send();
+
+    //update daily token stats
+    ludio.symbol=CREDITS_SYMBOL;
+    updateDailyStats(ludio,1);
 }
 
 void clashdomedst::updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uint32_t partial_orcs) {
@@ -342,3 +346,118 @@ void clashdomedst::transfer(const name &from, const name &to, const asset &quant
         ).send();
     }
 }
+
+
+void clashdomedst::updateDailyStats(asset assetVal,int type){
+    int64_t amount= assetVal.amount;
+    symbol symbol= assetVal.symbol;
+
+    asset nullasset;
+    nullasset.amount=0.0000;
+    nullasset.symbol=CARBZ_SYMBOL;
+    uint64_t timestamp = eosio::current_time_point().sec_since_epoch();
+    
+    uint32_t day=epochToDay(timestamp);
+
+    auto ptokenstatsitr = tokenstats.find(day);
+
+    if (ptokenstatsitr == tokenstats.end()) {
+
+
+        ptokenstatsitr = tokenstats.emplace(CONTRACTN, [&](auto &new_d) {
+            new_d.day = day;
+            new_d.mined_carbz=nullasset;
+            new_d.consumed_carbz=nullasset;
+            new_d.burned_carbz=nullasset;
+            nullasset.symbol=CREDITS_SYMBOL;
+            new_d.mined_credits=nullasset;
+            new_d.consumed_credits=nullasset;
+            new_d.burned_credits=nullasset;
+            nullasset.symbol=JIGOWATTS_SYMBOL;
+            new_d.mined_jigo=nullasset;
+            new_d.consumed_jigo=nullasset;
+            new_d.burned_jigo=nullasset;
+        });
+    }
+    if(symbol==CARBZ_SYMBOL){
+        if (type==1){
+        //mined carbz++
+        int64_t currtoken=ptokenstatsitr->mined_carbz.amount;
+        currtoken += amount;
+        tokenstats.modify(ptokenstatsitr, get_self(), [&](auto &mod_day) {
+                mod_day.mined_carbz.amount=currtoken;
+            });
+        
+        }else if(type==0){
+        //consumed carbz++
+        int64_t currtoken=ptokenstatsitr->consumed_carbz.amount;
+        currtoken += amount;
+        tokenstats.modify(ptokenstatsitr, get_self(), [&](auto &mod_day) {
+                mod_day.consumed_carbz.amount=currtoken;
+            });
+        }else if(type==2){
+        //burned carbz++
+        int64_t currtoken=ptokenstatsitr->burned_carbz.amount;
+        currtoken += amount;
+        tokenstats.modify(ptokenstatsitr, get_self(), [&](auto &mod_day) {
+                mod_day.burned_carbz.amount=currtoken;
+            });
+        }
+    }
+    else if(symbol==CREDITS_SYMBOL){
+        if (type==1){
+        //mined credits++
+        int64_t currtoken=ptokenstatsitr->mined_credits.amount;
+        currtoken += amount;
+        tokenstats.modify(ptokenstatsitr, get_self(), [&](auto &mod_day) {
+                mod_day.mined_credits.amount=currtoken;
+            });
+        
+        }else if(type==0){
+        //consumed credits++
+        int64_t currtoken=ptokenstatsitr->consumed_credits.amount;
+        currtoken += amount;
+        tokenstats.modify(ptokenstatsitr, get_self(), [&](auto &mod_day) {
+                mod_day.consumed_credits.amount=currtoken;
+            });
+        }else if(type==2){
+        //burned credits++
+        int64_t currtoken=ptokenstatsitr->burned_credits.amount;
+        currtoken += amount;
+        tokenstats.modify(ptokenstatsitr, get_self(), [&](auto &mod_day) {
+                mod_day.burned_credits.amount=currtoken;
+            });
+        }
+    }
+    else if(symbol==JIGOWATTS_SYMBOL){
+        if (type==1){
+        //minted jigo++
+        int64_t currtoken=ptokenstatsitr->mined_jigo.amount;
+        currtoken += amount;
+        tokenstats.modify(ptokenstatsitr, get_self(), [&](auto &mod_day) {
+                mod_day.mined_jigo.amount=currtoken;
+            });
+        
+        }else if(type==0){
+        //consumed jigo++
+        int64_t currtoken=ptokenstatsitr->consumed_jigo.amount;
+        currtoken += amount;
+        tokenstats.modify(ptokenstatsitr, get_self(), [&](auto &mod_day) {
+                mod_day.consumed_jigo.amount=currtoken;
+            });
+        }else if(type==2){
+        //burned jigo++
+        int64_t currtoken=ptokenstatsitr->burned_jigo.amount;
+        currtoken += amount;
+        tokenstats.modify(ptokenstatsitr, get_self(), [&](auto &mod_day) {
+                mod_day.burned_jigo.amount=currtoken;
+            });
+        }
+    }
+} 
+uint32_t clashdomedst::epochToDay(time_t time){
+    tm *tm_gmt = gmtime(&time);
+	uint32_t daytime=0;
+	return daytime=(tm_gmt->tm_year+1900)*10000+(tm_gmt->tm_mon+1)*100+(tm_gmt->tm_mday);
+}
+

@@ -102,4 +102,36 @@ private:
 
     typedef multi_index <name("opensale"), opensale_s> opensale_t;
     opensale_t opensale = opensale_t(get_self(), get_self().value); 
+
+    // TOKEN STATS
+    TABLE tokenstats_s{
+
+        uint32_t day;
+        asset mined_carbz;
+        asset consumed_carbz;
+        asset burned_carbz;
+        asset mined_credits;
+        asset consumed_credits;
+        asset burned_credits;
+        asset mined_jigo;
+        asset consumed_jigo;
+        asset burned_jigo;
+        
+
+        uint64_t primary_key() const {return (uint64_t) day;}
+    };
+
+    typedef multi_index<name("tokenstats"), tokenstats_s> coindailystats_t;
+
+    coindailystats_t tokenstats = coindailystats_t(get_self(), get_self().value); 
+
+    //AUXILIAR FUNCTIONS
+    void updateDailyStats(asset assetVal,int type);
+    uint32_t epochToDay(time_t time);
+
+    //CONSTANTS
+    static constexpr symbol CREDITS_SYMBOL = symbol(symbol_code("CREDITS"), 4);
+    static constexpr symbol CARBZ_SYMBOL = symbol(symbol_code("CARBZ"), 4);
+    static constexpr symbol JIGOWATTS_SYMBOL = symbol(symbol_code("JIGO"), 4);
+
 };

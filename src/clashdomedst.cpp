@@ -4,77 +4,148 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
     
     require_auth(account);
 
-    // CHECK IF game_id IS VALID
-    check(game_id >= 0 && game_id < sizeof(GAME_NAMES)/sizeof(GAME_NAMES[0]), "wrong game ID:" + to_string(game_id));
-
     atomicassets::assets_t player_assets = atomicassets::get_assets(account);
     auto asset_itr = player_assets.require_find(asset_id, "No NFT with this ID exists");
 
-    // CHECK THAT THE ASSET CORRESPONDS TO OUR COLLECTION
     check(asset_itr->collection_name == name(COLLECTION_NAME), "NFT doesn't correspond to " + COLLECTION_NAME);
-    check(asset_itr->schema_name == name(SCHEMA_NAME), "NFT doesn't correspond to schema " + SCHEMA_NAME);
 
-    // CHECK HOW MANY ORCS ARE IN THE PARTIAL COUNTER
-    atomicassets::schemas_t collection_schemas = atomicassets::get_schemas(name(COLLECTION_NAME));
-    auto schema_itr = collection_schemas.find(name(SCHEMA_NAME).value);
+    if (game_id == 0) {
 
-    atomicassets::templates_t collection_templates = atomicassets::get_templates(name(COLLECTION_NAME));
-    auto template_itr = collection_templates.find(asset_itr->template_id);
+        // CHECK THAT THE ASSET CORRESPONDS TO OUR COLLECTION
+        check(asset_itr->schema_name == name(SCHEMA_NAME_LANDS), "NFT doesn't correspond to schema " + SCHEMA_NAME_LANDS);
 
-    vector <uint8_t> immutable_serialized_data = template_itr->immutable_serialized_data;
-    vector <uint8_t> mutable_serialized_data = asset_itr->mutable_serialized_data;
+        // CHECK HOW MANY ORCS ARE IN THE PARTIAL COUNTER
+        atomicassets::schemas_t collection_schemas = atomicassets::get_schemas(name(COLLECTION_NAME));
+        auto schema_itr = collection_schemas.find(name(SCHEMA_NAME_LANDS).value);
 
-    atomicassets::ATTRIBUTE_MAP idata = atomicdata::deserialize(immutable_serialized_data, schema_itr->format);
-    atomicassets::ATTRIBUTE_MAP mdata = atomicdata::deserialize(mutable_serialized_data, schema_itr->format);
+        atomicassets::templates_t collection_templates = atomicassets::get_templates(name(COLLECTION_NAME));
+        auto template_itr = collection_templates.find(asset_itr->template_id);
 
-    uint8_t co_owners_amount = get<uint8_t> (idata["co-owners_amount"]);
-    uint64_t partial_dead_orcs_counter = get<uint64_t> (mdata["partial_dead_orcs_counter"]);
+        vector <uint8_t> immutable_serialized_data = template_itr->immutable_serialized_data;
+        vector <uint8_t> mutable_serialized_data = asset_itr->mutable_serialized_data;
 
-    check(partial_dead_orcs_counter > 0, "Nothing to claim");
+        atomicassets::ATTRIBUTE_MAP idata = atomicdata::deserialize(immutable_serialized_data, schema_itr->format);
+        atomicassets::ATTRIBUTE_MAP mdata = atomicdata::deserialize(mutable_serialized_data, schema_itr->format);
 
-    auto today_orcs_data_itr = killedorcs.crbegin();
-    uint16_t orcs_ludio_ratio = today_orcs_data_itr->orcs_ludio_ratio;
+        uint8_t co_owners_amount = get<uint8_t> (idata["co-owners_amount"]);
+        uint64_t partial_dead_orcs_counter = get<uint64_t> (mdata["partial_dead_orcs_counter"]);
 
-    uint64_t killed_orcs_ludio_reward = (uint64_t) ((((float) partial_dead_orcs_counter / (float) co_owners_amount) / (float) orcs_ludio_ratio) * 10000.0); 
+        check(partial_dead_orcs_counter > 0, "Nothing to claim");
 
-    // REWARD THE CORRESPONDING LUDIO
-    asset ludio;
-    ludio.symbol = LUDIO_SYMBOL;
-    ludio.amount = killed_orcs_ludio_reward;
+        auto today_orcs_data_itr = killedorcs.crbegin();
+        uint16_t orcs_ludio_ratio = today_orcs_data_itr->orcs_ludio_ratio;
 
-    string land_name = get<string> (idata["name"]);
+        uint64_t killed_orcs_ludio_reward = (uint64_t) ((((float) partial_dead_orcs_counter / (float) co_owners_amount) / (float) orcs_ludio_ratio) * 10000.0); 
 
-    action(
-        permission_level{get_self(), name("active")},
-        name("clashdometkn"),
-        name("transfer"),
-        std::make_tuple (
-            get_self(),
-            account,
-            ludio,
-            GAME_NAMES[game_id] + " land " + land_name + " owner reward" 
-        )
-    ).send();
+        // REWARD THE CORRESPONDING LUDIO
+        asset ludio;
+        ludio.symbol = LUDIO_SYMBOL;
+        ludio.amount = killed_orcs_ludio_reward;
 
-    // CHANGE THE MUTABLE DATA IN THE NFT
-    mdata["partial_dead_orcs_counter"] = (uint64_t) 0;
-    mdata["last_claim_timestamp"] = (uint64_t) eosio::current_time_point().sec_since_epoch();
+        string land_name = get<string> (idata["name"]);
 
-    action(
-        permission_level{get_self(), name("active")},
-        name("atomicassets"),
-        name("setassetdata"),
-        std::make_tuple (
-            get_self(),
-            account,
-            asset_id,
-            mdata
-        )
-    ).send();
+        action(
+            permission_level{get_self(), name("active")},
+            name("clashdometkn"),
+            name("transfer"),
+            std::make_tuple (
+                get_self(),
+                account,
+                ludio,
+                GAME_NAMES[game_id] + " land " + land_name + " owner reward" 
+            )
+        ).send();
 
-    //update daily token stats
-    ludio.symbol=CREDITS_SYMBOL;
-    updateDailyStats(ludio,1);
+        // CHANGE THE MUTABLE DATA IN THE NFT
+        mdata["partial_dead_orcs_counter"] = (uint64_t) 0;
+        mdata["last_claim_timestamp"] = (uint64_t) eosio::current_time_point().sec_since_epoch();
+
+        action(
+            permission_level{get_self(), name("active")},
+            name("atomicassets"),
+            name("setassetdata"),
+            std::make_tuple (
+                get_self(),
+                account,
+                asset_id,
+                mdata
+            )
+        ).send();
+
+        //update daily token stats
+        ludio.symbol=CREDITS_SYMBOL;
+        updateDailyStats(ludio,1);
+    } else if (game_id == 4) {
+
+        // CHECK THAT THE ASSET CORRESPONDS TO OUR COLLECTION
+        check(asset_itr->schema_name == name(SCHEMA_NAME_HALL), "NFT doesn't correspond to schema " + SCHEMA_NAME_HALL);
+
+        // CHECK HOW MANY ORCS ARE IN THE PARTIAL COUNTER
+        atomicassets::schemas_t collection_schemas = atomicassets::get_schemas(name(COLLECTION_NAME));
+        auto schema_itr = collection_schemas.find(name(SCHEMA_NAME_HALL).value);
+
+        atomicassets::templates_t collection_templates = atomicassets::get_templates(name(COLLECTION_NAME));
+        auto template_itr = collection_templates.find(asset_itr->template_id);
+
+        vector <uint8_t> immutable_serialized_data = template_itr->immutable_serialized_data;
+        vector <uint8_t> mutable_serialized_data = asset_itr->mutable_serialized_data;
+
+        atomicassets::ATTRIBUTE_MAP idata = atomicdata::deserialize(immutable_serialized_data, schema_itr->format);
+        atomicassets::ATTRIBUTE_MAP mdata = atomicdata::deserialize(mutable_serialized_data, schema_itr->format);
+
+        uint8_t co_owners_amount = get<uint8_t> (idata["co-owners_amount"]);
+        uint64_t partial_pocketed_balls = get<uint64_t> (mdata["partial_pocketed_balls"]);
+
+        check(partial_pocketed_balls > 0, "Nothing to claim");
+
+        auto today_balls_data_itr = pballs.crbegin();
+        uint16_t balls_ludio_ratio = today_balls_data_itr->balls_ludio_ratio;
+
+        uint64_t balls_pocketed_ludio_reward = (uint64_t) ((((float) partial_pocketed_balls / (float) co_owners_amount) / (float) balls_ludio_ratio) * 10000.0); 
+
+        // REWARD THE CORRESPONDING LUDIO
+        asset ludio;
+        ludio.symbol = LUDIO_SYMBOL;
+        ludio.amount = balls_pocketed_ludio_reward;
+
+        string hall_name = get<string> (idata["name"]);
+
+        action(
+            permission_level{get_self(), name("active")},
+            name("clashdometkn"),
+            name("transfer"),
+            std::make_tuple (
+                get_self(),
+                account,
+                ludio,
+                GAME_NAMES[game_id] + " hall " + hall_name + " owner reward" 
+            )
+        ).send();
+
+        // CHANGE THE MUTABLE DATA IN THE NFT
+        mdata["partial_pocketed_balls"] = (uint64_t) 0;
+        mdata["last_claim_timestamp"] = (uint64_t) eosio::current_time_point().sec_since_epoch();
+
+        action(
+            permission_level{get_self(), name("active")},
+            name("atomicassets"),
+            name("setassetdata"),
+            std::make_tuple (
+                get_self(),
+                account,
+                asset_id,
+                mdata
+            )
+        ).send();
+
+        //update daily token stats
+        ludio.symbol=CREDITS_SYMBOL;
+        updateDailyStats(ludio,1);
+    } else {
+        check(0 == 1, "wrong game ID:" + to_string(game_id));
+    }
+
+    
 }
 
 void clashdomedst::updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uint32_t partial_orcs) {
@@ -156,6 +227,85 @@ void clashdomedst::updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uin
     }
 }
 
+void clashdomedst::updateballs(uint32_t balls, uint32_t day, uint16_t hall_id, uint32_t partial_balls) {
+    
+    require_auth(get_self());
+
+    auto balls_itr = pballs.find(day);
+
+    uint8_t size = 0;
+
+    if (balls_itr == pballs.end()) {
+
+        uint64_t total_pocketed_balls = 0;
+
+        for (auto itr = pballs.begin(); itr != pballs.end(); ++itr) {
+
+            size ++;
+
+            if (size <= 5) {
+                total_pocketed_balls += itr->pocketed_balls;
+            }
+        }
+
+        if (size > 29) { 
+            pballs.erase(pballs.begin());
+        }
+
+        uint16_t balls_ludio_ratio;
+
+        float pocketed_balls_average = total_pocketed_balls / 5;
+
+        if (pocketed_balls_average < 750000) {
+            balls_ludio_ratio = 5;
+        } else {
+
+            float f;
+
+            if (pocketed_balls_average < 5E6) {
+                f = 0.85;
+            } else if (pocketed_balls_average < 1E7) {
+                f = 0.75;
+            } else if (pocketed_balls_average < 1E8) {
+                f = 0.65;
+            } else {
+                f = 0.5;
+            }
+
+            balls_ludio_ratio = (uint16_t) (pocketed_balls_average / 750000 * 5 * f);
+        }
+        
+        pballs.emplace(get_self(), [&](auto &_balls) {
+            _balls.day = day;
+            _balls.pocketed_balls = balls;
+            _balls.balls_ludio_ratio = balls_ludio_ratio;
+        });
+
+    } else {
+
+        pballs.modify(balls_itr, get_self(), [&](auto &_balls) {
+            _balls.pocketed_balls += balls;
+        });
+    }
+
+    hallactivity.emplace(get_self(), [&](auto &_hall_data) {
+        _hall_data.timestamp = (uint64_t) eosio::current_time_point().sec_since_epoch();
+        _hall_data.hall_id = hall_id;
+        _hall_data.partial_balls = partial_balls;
+    });
+
+    size = 0;
+
+    for (auto itr = hallactivity.begin(); itr != hallactivity.end(); ++itr) {
+
+        size ++;
+    }
+
+    if (size > 50) { 
+        hallactivity.erase(hallactivity.begin());
+    }
+}
+
 void clashdomedst::clearorcs() {
 
     require_auth(get_self());
@@ -175,178 +325,6 @@ void clashdomedst::clearlands() {
         it = landactivity.erase(it);
     }
 }
-
-void clashdomedst::addtowl(vector <name> accounts_to_add) {
-
-    require_auth(get_self());
-
-    // TODO: CHECK IF ACCOUNTS ARE DUPLICATED AND VALID 
-    
-    auto wl_itr = whitelists.begin();
-
-    if (wl_itr == whitelists.end()) {
-
-        whitelists.emplace(get_self(), [&](auto &_wl) {
-            _wl.id = 1;
-            _wl.whitelist = accounts_to_add;
-        });
-
-    } else {
-
-        vector<name> whitelist = wl_itr->whitelist;
-
-        for (auto accounts_itr = accounts_to_add.begin(); accounts_itr < accounts_to_add.end(); accounts_itr ++) {
-            whitelist.push_back(*accounts_itr);
-        }
-
-        whitelists.modify(wl_itr, get_self(), [&](auto &_wl) {
-
-            _wl.whitelist = whitelist;
-        });
-    }   
-}
-
-void clashdomedst::clearwl() {
-    
-    require_auth(get_self());
-
-    auto it = whitelists.begin();
-    while (it != whitelists.end()) {
-        it = whitelists.erase(it);
-    }
-}
-
-void clashdomedst::clearopensale() {
-    
-    require_auth(get_self());
-
-    auto it = opensale.begin();
-    while (it != opensale.end()) {
-        it = opensale.erase(it);
-    }
-}
-
-void clashdomedst::setnftsold(uint32_t n) {
-
-    require_auth(get_self());
-
-    auto nftsold_itr = nftsold.begin();
-
-    if (nftsold_itr == nftsold.end()) {
-
-        nftsold.emplace(get_self(), [&](auto &_nftsold) {
-            _nftsold.id = 1;
-            _nftsold.n = n;
-        });
-
-    } else {
-
-        nftsold.modify(nftsold_itr, get_self(), [&](auto &_nftsold) {
-            _nftsold.n = n;
-        });
-    }
-}
-
-void clashdomedst::transfer(const name &from, const name &to, const asset &quantity, const string &memo) {
-
-    require_auth(from);
-
-    if (from == _self || to != _self) {
-        return;
-    }
-
-    // CHECK IF IS IT A VALID LUDIO PAYMENT
-    check(quantity.symbol.is_valid(), "invalid quantity");
-    check(quantity.symbol == LUDIO_SYMBOL, "only LUDIO tokens allowed");
-    check(quantity.amount > 0, "only positive LUDIO transfer allowed");
-
-    if (memo == "early access NFT") {
-
-        // CHECK IF THE SALE IS OPEN
-        uint64_t timestamp = (uint64_t) eosio::current_time_point().sec_since_epoch();
-
-        check(timestamp > SALE_TIME, "the sale is not open yet");  
-        check(quantity.amount >= NFT_PRICE, "not enough LUDIO to complete the transaction");
-       
-        // CHECK NUM NFT SOLD
-        auto nftsold_itr = nftsold.begin();
-        uint32_t nfts_sold = nftsold_itr->n;
-
-        check(nfts_sold < NFT_MAX_SUPPLY, "NFT sold out");
-
-        if (WHITELISTED_SALE) {
-
-            // CHECK IF ACCOUNT IS WHITELISTED
-            bool whitelisted = false;
-
-            auto wl_itr = whitelists.begin();
-            vector<name> whitelist = wl_itr->whitelist;
-
-            for (auto it = whitelist.begin(); it != whitelist.end(); ++it) {
-
-                if (*it == from) {
-
-                    whitelisted = true;
-
-                    // REMOVE IT FROM THE WHITELIST
-                    whitelist.erase(it);
-
-                    whitelists.modify(wl_itr, get_self(), [&](auto &_wl) {
-                        _wl.whitelist = whitelist;
-                    });
-
-                    break; 
-                }
-            }
-
-            check(whitelisted, "account is not whitelisted or has already purchased an NFT");
-
-        } else {
-
-            uint64_t timestamp = (uint64_t) eosio::current_time_point().sec_since_epoch();
-
-            auto opensale_itr = opensale.find(from.value);
-
-            if (opensale_itr == opensale.end()) {
-
-                opensale.emplace(get_self(), [&](auto &_sale_data) {
-                    _sale_data.account_value = from.value;
-                    _sale_data.timestamp = timestamp;
-                });
-
-            } else {
-
-                check(timestamp - opensale_itr->timestamp > 600, "only 1 NFT allowed, 10 minuntes cooldown");
-
-                opensale.modify(opensale_itr, get_self(), [&](auto &_sale_data) {
-                    _sale_data.timestamp = timestamp;
-                });
-            }
-        }
-   
-        nftsold.modify(nftsold_itr, get_self(), [&](auto &_nftsold) {
-            _nftsold.n = nfts_sold + 1;
-        });
-
-        // MINT THE NFT
-        action (
-            permission_level{get_self(), name("active")},
-            name("atomicassets"),
-            name("mintasset"),
-            std::make_tuple(
-                get_self(),
-                name(EARLY_ACCESS_COLLECTION_NAME),
-                name(EARLY_ACCESS_SCHEMA_NAME),
-                EARLY_ACCESS_TEMPLATE_ID,
-                from,
-                (atomicassets::ATTRIBUTE_MAP) {},
-                (atomicassets::ATTRIBUTE_MAP) {},
-                (vector <asset>) {}
-            )
-        ).send();
-    }
-}
-
 
 void clashdomedst::updateDailyStats(asset assetVal,int type){
     int64_t amount= assetVal.amount;

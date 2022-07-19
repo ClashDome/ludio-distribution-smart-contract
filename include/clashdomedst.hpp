@@ -19,15 +19,9 @@ public:
 
     ACTION claimludio(name account, uint64_t asset_id, uint16_t game_id);
     ACTION updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uint32_t partial_orcs);
+    ACTION updateballs(uint32_t balls, uint32_t day, uint16_t hall_id, uint32_t partial_balls);
     ACTION clearorcs();
     ACTION clearlands();
-    ACTION clearopensale();
-
-    ACTION addtowl(vector <name> accounts_to_add);
-    ACTION clearwl();
-    ACTION setnftsold(uint32_t n);
-
-    [[eosio::on_notify("clashdometkn::transfer")]] void transfer(const name &from, const name &to, const asset &quantity, const string &memo);
 
 private:
 
@@ -42,6 +36,17 @@ private:
     typedef multi_index <name("landactivity"), landactivity_s> landactivity_t;
     landactivity_t landactivity = landactivity_t(get_self(), get_self().value); 
 
+     TABLE hallactivity_s {
+        uint64_t timestamp;
+        uint16_t hall_id;
+        uint64_t partial_balls;
+    
+        uint64_t primary_key() const {return timestamp;}
+    };
+
+    typedef multi_index <name("hallactivity"), hallactivity_s> hallactivity_t;
+    hallactivity_t hallactivity = hallactivity_t(get_self(), get_self().value); 
+
     TABLE killedorcs_s {
         uint32_t day;
         uint64_t kills;
@@ -53,10 +58,43 @@ private:
     typedef multi_index <name("killedorcs"), killedorcs_s> killedorcs_t;
     killedorcs_t killedorcs = killedorcs_t(get_self(), get_self().value); 
 
-    const string GAME_NAMES[3] = {"Endless Siege", "Candy Fiesta", "Templok"};
+    TABLE pballs_s {
+        uint32_t day;
+        uint64_t pocketed_balls;
+        uint16_t balls_ludio_ratio;
+
+        uint64_t primary_key() const {return (uint64_t) day;}
+    };
+
+    typedef multi_index <name("pballs"), pballs_s> pballs_t;
+    pballs_t pballs = pballs_t(get_self(), get_self().value); 
+
+     // TOKEN STATS
+    TABLE tokenstats_s{
+
+        uint32_t day;
+        asset mined_carbz;
+        asset consumed_carbz;
+        asset burned_carbz;
+        asset mined_credits;
+        asset consumed_credits;
+        asset burned_credits;
+        asset mined_jigo;
+        asset consumed_jigo;
+        asset burned_jigo;
+
+        uint64_t primary_key() const {return (uint64_t) day;}
+    };
+
+    typedef multi_index<name("tokenstats"), tokenstats_s> coindailystats_t;
+
+    coindailystats_t tokenstats = coindailystats_t(get_self(), get_self().value); 
+
+    const string GAME_NAMES[5] = {"Endless Siege", "Candy Fiesta", "Templok", "Ringy Dingy", "Rug Pool"};
 
     const string COLLECTION_NAME = "clashdomenft";
-    const string SCHEMA_NAME = "lands";
+    const string SCHEMA_NAME_LANDS = "lands";
+    const string SCHEMA_NAME_HALL = "poolhalls";
 
     static constexpr symbol LUDIO_SYMBOL = symbol(symbol_code("LUDIO"), 4);
 
@@ -70,68 +108,13 @@ private:
     const uint32_t EARLY_ACCESS_TEMPLATE_ID = 230544;
     const bool WHITELISTED_SALE = true;
 
-    TABLE whitelists_s {
-    
-        uint64_t id;
-        vector<name> whitelist;
-
-        uint64_t primary_key() const {return  id;}
-    };
-
-    typedef multi_index <name("whitelists"), whitelists_s> whitelists_t;
-    whitelists_t whitelists = whitelists_t(get_self(), get_self().value); 
-
-    TABLE nftsold_s {
-    
-        uint64_t id;
-        uint32_t n;
-
-        uint64_t primary_key() const {return  id;}
-    };
-
-    typedef multi_index <name("nftsold"), nftsold_s> nftsold_t;
-    nftsold_t nftsold = nftsold_t(get_self(), get_self().value); 
-
-    TABLE opensale_s {
-    
-        uint64_t account_value;
-        uint64_t timestamp;
-
-        uint64_t primary_key() const {return account_value;}
-    };
-
-    typedef multi_index <name("opensale"), opensale_s> opensale_t;
-    opensale_t opensale = opensale_t(get_self(), get_self().value); 
-
-    // TOKEN STATS
-    TABLE tokenstats_s{
-
-        uint32_t day;
-        asset mined_carbz;
-        asset consumed_carbz;
-        asset burned_carbz;
-        asset mined_credits;
-        asset consumed_credits;
-        asset burned_credits;
-        asset mined_jigo;
-        asset consumed_jigo;
-        asset burned_jigo;
-        
-
-        uint64_t primary_key() const {return (uint64_t) day;}
-    };
-
-    typedef multi_index<name("tokenstats"), tokenstats_s> coindailystats_t;
-
-    coindailystats_t tokenstats = coindailystats_t(get_self(), get_self().value); 
-
-    //AUXILIAR FUNCTIONS
-    void updateDailyStats(asset assetVal,int type);
-    uint32_t epochToDay(time_t time);
-
     //CONSTANTS
     static constexpr symbol CREDITS_SYMBOL = symbol(symbol_code("CREDITS"), 4);
     static constexpr symbol CARBZ_SYMBOL = symbol(symbol_code("CARBZ"), 4);
     static constexpr symbol JIGOWATTS_SYMBOL = symbol(symbol_code("JIGO"), 4);
+
+    //AUXILIAR FUNCTIONS
+    void updateDailyStats(asset assetVal,int type);
+    uint32_t epochToDay(time_t time);
 
 };

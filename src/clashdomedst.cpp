@@ -256,23 +256,23 @@ void clashdomedst::updateballs(uint32_t balls, uint32_t day, uint16_t hall_id, u
 
         float pocketed_balls_average = total_pocketed_balls / 5;
 
-        if (pocketed_balls_average < 750000) {
+        if (pocketed_balls_average < 15000) {
             balls_ludio_ratio = 5;
         } else {
 
             float f;
 
-            if (pocketed_balls_average < 5E6) {
+            if (pocketed_balls_average < 100000) {
                 f = 0.85;
-            } else if (pocketed_balls_average < 1E7) {
+            } else if (pocketed_balls_average < 200000) {
                 f = 0.75;
-            } else if (pocketed_balls_average < 1E8) {
+            } else if (pocketed_balls_average < 2000000) {
                 f = 0.65;
             } else {
                 f = 0.5;
             }
 
-            balls_ludio_ratio = (uint16_t) (pocketed_balls_average / 750000 * 5 * f);
+            balls_ludio_ratio = (uint16_t) (pocketed_balls_average / 15000 * 5 * f);
         }
         
         pballs.emplace(get_self(), [&](auto &_balls) {

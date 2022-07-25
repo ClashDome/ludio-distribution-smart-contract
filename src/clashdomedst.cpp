@@ -99,7 +99,7 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
         check(partial_pocketed_balls > 0, "Nothing to claim");
 
         auto today_balls_data_itr = pballs.crbegin();
-        uint16_t balls_ludio_ratio = today_balls_data_itr->balls_ludio_ratio;
+        uint16_t balls_ludio_ratio = 1;
 
         uint64_t balls_pocketed_ludio_reward = (uint64_t) ((((float) partial_pocketed_balls / (float) co_owners_amount) / (float) balls_ludio_ratio) * 10000.0); 
 
@@ -252,28 +252,28 @@ void clashdomedst::updateballs(uint32_t balls, uint32_t day, uint16_t hall_id, u
             pballs.erase(pballs.begin());
         }
 
-        uint16_t balls_ludio_ratio;
+        uint16_t balls_ludio_ratio = 1;
 
-        float pocketed_balls_average = total_pocketed_balls / 5;
+        // float pocketed_balls_average = total_pocketed_balls / 5;
 
-        if (pocketed_balls_average < 15000) {
-            balls_ludio_ratio = 5;
-        } else {
+        // if (pocketed_balls_average < 15000) {
+        //     balls_ludio_ratio = 5;
+        // } else {
 
-            float f;
+        //     float f;
 
-            if (pocketed_balls_average < 100000) {
-                f = 0.85;
-            } else if (pocketed_balls_average < 200000) {
-                f = 0.75;
-            } else if (pocketed_balls_average < 2000000) {
-                f = 0.65;
-            } else {
-                f = 0.5;
-            }
+        //     if (pocketed_balls_average < 100000) {
+        //         f = 0.85;
+        //     } else if (pocketed_balls_average < 200000) {
+        //         f = 0.75;
+        //     } else if (pocketed_balls_average < 2000000) {
+        //         f = 0.65;
+        //     } else {
+        //         f = 0.5;
+        //     }
 
-            balls_ludio_ratio = (uint16_t) (pocketed_balls_average / 15000 * 5 * f);
-        }
+        //     balls_ludio_ratio = (uint16_t) (pocketed_balls_average / 15000 * 5 * f);
+        // }
         
         pballs.emplace(get_self(), [&](auto &_balls) {
             _balls.day = day;
@@ -323,6 +323,16 @@ void clashdomedst::clearlands() {
     auto it = landactivity.begin();
     while (it != landactivity.end()) {
         it = landactivity.erase(it);
+    }
+}
+
+void clashdomedst::clearballs() {
+
+    require_auth(get_self());
+
+    auto it = pballs.begin();
+    while (it != pballs.end()) {
+        it = pballs.erase(it);
     }
 }
 

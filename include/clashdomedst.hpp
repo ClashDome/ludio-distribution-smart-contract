@@ -22,6 +22,7 @@ public:
     ACTION updateballs(uint32_t balls, uint32_t day, uint16_t hall_id, uint32_t partial_balls);
     ACTION clearorcs();
     ACTION clearlands();
+    ACTION clearballs();
 
 private:
 

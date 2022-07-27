@@ -149,6 +149,26 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
     
 }
 
+void clashdomedst::claim(name account) {
+    
+    require_auth(account);
+
+    uint64_t timestamp = eosio::current_time_point().sec_since_epoch();
+
+    auto claim_itr = claimsts.find(account.value);
+
+    if (claim_itr == claimsts.end()) {
+        claimsts.emplace(get_self(), [&](auto &_row) {
+            _row.account = account;
+            _row.timestamp = timestamp;
+        });
+    } else {
+        claimsts.modify(claim_itr, get_self(), [&](auto &_row) {
+            _row.timestamp = timestamp;
+        });
+    }
+}
+
 void clashdomedst::updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uint32_t partial_orcs) {
     
     require_auth(get_self());

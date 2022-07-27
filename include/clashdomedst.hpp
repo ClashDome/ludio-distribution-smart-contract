@@ -18,6 +18,7 @@ public:
     using contract::contract;
 
     ACTION claimludio(name account, uint64_t asset_id, uint16_t game_id);
+    ACTION claim(name account);
     ACTION updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uint32_t partial_orcs);
     ACTION updateballs(uint32_t balls, uint32_t day, uint16_t hall_id, uint32_t partial_balls);
     ACTION clearorcs();
@@ -26,6 +27,16 @@ public:
     [[eosio::on_notify("clashdometkn::transfer")]] void transfer(const name &from, const name &to, const asset &quantity, const string &memo);
 
 private:
+
+    TABLE claimsts_s {
+        name account;
+        uint64_t timestamp;
+    
+        uint64_t primary_key() const {return account.value;}
+    };
+
+    typedef multi_index <name("claimsts"), claimsts_s> claimsts_t;
+    claimsts_t claimsts = claimsts_t(get_self(), get_self().value); 
 
     TABLE landactivity_s {
         uint64_t timestamp;

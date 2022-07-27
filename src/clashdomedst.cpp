@@ -77,70 +77,71 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
         updateDailyStats(ludio,1);
     } else if (game_id == 4) {
 
-        // CHECK THAT THE ASSET CORRESPONDS TO OUR COLLECTION
-        check(asset_itr->schema_name == name(SCHEMA_NAME_HALL), "NFT doesn't correspond to schema " + SCHEMA_NAME_HALL);
+        check(0 == 1, "Currently disabled, try again later.");
+        // // CHECK THAT THE ASSET CORRESPONDS TO OUR COLLECTION
+        // check(asset_itr->schema_name == name(SCHEMA_NAME_HALL), "NFT doesn't correspond to schema " + SCHEMA_NAME_HALL);
 
-        // CHECK HOW MANY ORCS ARE IN THE PARTIAL COUNTER
-        atomicassets::schemas_t collection_schemas = atomicassets::get_schemas(name(COLLECTION_NAME));
-        auto schema_itr = collection_schemas.find(name(SCHEMA_NAME_HALL).value);
+        // // CHECK HOW MANY ORCS ARE IN THE PARTIAL COUNTER
+        // atomicassets::schemas_t collection_schemas = atomicassets::get_schemas(name(COLLECTION_NAME));
+        // auto schema_itr = collection_schemas.find(name(SCHEMA_NAME_HALL).value);
 
-        atomicassets::templates_t collection_templates = atomicassets::get_templates(name(COLLECTION_NAME));
-        auto template_itr = collection_templates.find(asset_itr->template_id);
+        // atomicassets::templates_t collection_templates = atomicassets::get_templates(name(COLLECTION_NAME));
+        // auto template_itr = collection_templates.find(asset_itr->template_id);
 
-        vector <uint8_t> immutable_serialized_data = template_itr->immutable_serialized_data;
-        vector <uint8_t> mutable_serialized_data = asset_itr->mutable_serialized_data;
+        // vector <uint8_t> immutable_serialized_data = template_itr->immutable_serialized_data;
+        // vector <uint8_t> mutable_serialized_data = asset_itr->mutable_serialized_data;
 
-        atomicassets::ATTRIBUTE_MAP idata = atomicdata::deserialize(immutable_serialized_data, schema_itr->format);
-        atomicassets::ATTRIBUTE_MAP mdata = atomicdata::deserialize(mutable_serialized_data, schema_itr->format);
+        // atomicassets::ATTRIBUTE_MAP idata = atomicdata::deserialize(immutable_serialized_data, schema_itr->format);
+        // atomicassets::ATTRIBUTE_MAP mdata = atomicdata::deserialize(mutable_serialized_data, schema_itr->format);
 
-        uint8_t co_owners_amount = get<uint8_t> (idata["co-owners_amount"]);
-        uint64_t partial_pocketed_balls = get<uint64_t> (mdata["partial_pocketed_balls"]);
+        // uint8_t co_owners_amount = get<uint8_t> (idata["co-owners_amount"]);
+        // uint64_t partial_pocketed_balls = get<uint64_t> (mdata["partial_pocketed_balls"]);
 
-        check(partial_pocketed_balls > 0, "Nothing to claim");
+        // check(partial_pocketed_balls > 0, "Nothing to claim");
 
-        auto today_balls_data_itr = pballs.crbegin();
-        uint16_t balls_ludio_ratio = 1;
+        // auto today_balls_data_itr = pballs.crbegin();
+        // uint16_t balls_ludio_ratio = today_balls_data_itr->balls_ludio_ratio;
 
-        uint64_t balls_pocketed_ludio_reward = (uint64_t) ((((float) partial_pocketed_balls / (float) co_owners_amount) / (float) balls_ludio_ratio) * 10000.0); 
+        // uint64_t balls_pocketed_ludio_reward = (uint64_t) ((((float) partial_pocketed_balls / (float) co_owners_amount) / (float) balls_ludio_ratio) * 10000.0); 
 
-        // REWARD THE CORRESPONDING LUDIO
-        asset ludio;
-        ludio.symbol = LUDIO_SYMBOL;
-        ludio.amount = balls_pocketed_ludio_reward;
+        // // REWARD THE CORRESPONDING LUDIO
+        // asset ludio;
+        // ludio.symbol = LUDIO_SYMBOL;
+        // ludio.amount = balls_pocketed_ludio_reward;
 
-        string hall_name = get<string> (idata["name"]);
+        // string hall_name = get<string> (idata["name"]);
 
-        action(
-            permission_level{get_self(), name("active")},
-            name("clashdometkn"),
-            name("transfer"),
-            std::make_tuple (
-                get_self(),
-                account,
-                ludio,
-                GAME_NAMES[game_id] + " hall " + hall_name + " owner reward" 
-            )
-        ).send();
+        // action(
+        //     permission_level{get_self(), name("active")},
+        //     name("clashdometkn"),
+        //     name("transfer"),
+        //     std::make_tuple (
+        //         get_self(),
+        //         account,
+        //         ludio,
+        //         GAME_NAMES[game_id] + " hall " + hall_name + " owner reward" 
+        //     )
+        // ).send();
 
-        // CHANGE THE MUTABLE DATA IN THE NFT
-        mdata["partial_pocketed_balls"] = (uint64_t) 0;
-        mdata["last_claim_timestamp"] = (uint64_t) eosio::current_time_point().sec_since_epoch();
+        // // CHANGE THE MUTABLE DATA IN THE NFT
+        // mdata["partial_pocketed_balls"] = (uint64_t) 0;
+        // mdata["last_claim_timestamp"] = (uint64_t) eosio::current_time_point().sec_since_epoch();
 
-        action(
-            permission_level{get_self(), name("active")},
-            name("atomicassets"),
-            name("setassetdata"),
-            std::make_tuple (
-                get_self(),
-                account,
-                asset_id,
-                mdata
-            )
-        ).send();
+        // action(
+        //     permission_level{get_self(), name("active")},
+        //     name("atomicassets"),
+        //     name("setassetdata"),
+        //     std::make_tuple (
+        //         get_self(),
+        //         account,
+        //         asset_id,
+        //         mdata
+        //     )
+        // ).send();
 
-        //update daily token stats
-        ludio.symbol=CREDITS_SYMBOL;
-        updateDailyStats(ludio,1);
+        // //update daily token stats
+        // ludio.symbol=CREDITS_SYMBOL;
+        // updateDailyStats(ludio,1);
     } else {
         check(0 == 1, "wrong game ID:" + to_string(game_id));
     }
@@ -333,6 +334,28 @@ void clashdomedst::clearballs() {
     auto it = pballs.begin();
     while (it != pballs.end()) {
         it = pballs.erase(it);
+    }
+}
+
+void clashdomedst::transfer(const name &from, const name &to, const asset &quantity, const string &memo) {
+
+    require_auth(from);
+
+    if (to == _self || from != _self) {
+        return;
+    }
+
+    // CHECK IF IT IS A VALID CLASHDOME TOKEN PAYMENT
+    check(quantity.symbol.is_valid(), "ClashDome Error - invalid quantity");
+    check(quantity.amount > 0, "ClashDome Error - only positive ClashDome token transfer allowed");
+
+    if (memo.find("NFT claim") != string::npos) {
+
+        asset ludio;
+        ludio.symbol = CREDITS_SYMBOL;
+        ludio.amount = quantity.amount;
+
+        updateDailyStats(ludio,1);
     }
 }
 

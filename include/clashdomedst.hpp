@@ -23,6 +23,7 @@ public:
     ACTION clearorcs();
     ACTION clearlands();
     ACTION clearballs();
+    [[eosio::on_notify("clashdometkn::transfer")]] void transfer(const name &from, const name &to, const asset &quantity, const string &memo);
 
 private:
 

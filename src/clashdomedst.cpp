@@ -11,70 +11,71 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
 
     if (game_id == 0) {
 
-        // CHECK THAT THE ASSET CORRESPONDS TO OUR COLLECTION
-        check(asset_itr->schema_name == name(SCHEMA_NAME_LANDS), "NFT doesn't correspond to schema " + SCHEMA_NAME_LANDS);
+        check(0 == 1, "Currently disabled, try again later.");
+        // // CHECK THAT THE ASSET CORRESPONDS TO OUR COLLECTION
+        // check(asset_itr->schema_name == name(SCHEMA_NAME_LANDS), "NFT doesn't correspond to schema " + SCHEMA_NAME_LANDS);
 
-        // CHECK HOW MANY ORCS ARE IN THE PARTIAL COUNTER
-        atomicassets::schemas_t collection_schemas = atomicassets::get_schemas(name(COLLECTION_NAME));
-        auto schema_itr = collection_schemas.find(name(SCHEMA_NAME_LANDS).value);
+        // // CHECK HOW MANY ORCS ARE IN THE PARTIAL COUNTER
+        // atomicassets::schemas_t collection_schemas = atomicassets::get_schemas(name(COLLECTION_NAME));
+        // auto schema_itr = collection_schemas.find(name(SCHEMA_NAME_LANDS).value);
 
-        atomicassets::templates_t collection_templates = atomicassets::get_templates(name(COLLECTION_NAME));
-        auto template_itr = collection_templates.find(asset_itr->template_id);
+        // atomicassets::templates_t collection_templates = atomicassets::get_templates(name(COLLECTION_NAME));
+        // auto template_itr = collection_templates.find(asset_itr->template_id);
 
-        vector <uint8_t> immutable_serialized_data = template_itr->immutable_serialized_data;
-        vector <uint8_t> mutable_serialized_data = asset_itr->mutable_serialized_data;
+        // vector <uint8_t> immutable_serialized_data = template_itr->immutable_serialized_data;
+        // vector <uint8_t> mutable_serialized_data = asset_itr->mutable_serialized_data;
 
-        atomicassets::ATTRIBUTE_MAP idata = atomicdata::deserialize(immutable_serialized_data, schema_itr->format);
-        atomicassets::ATTRIBUTE_MAP mdata = atomicdata::deserialize(mutable_serialized_data, schema_itr->format);
+        // atomicassets::ATTRIBUTE_MAP idata = atomicdata::deserialize(immutable_serialized_data, schema_itr->format);
+        // atomicassets::ATTRIBUTE_MAP mdata = atomicdata::deserialize(mutable_serialized_data, schema_itr->format);
 
-        uint8_t co_owners_amount = get<uint8_t> (idata["co-owners_amount"]);
-        uint64_t partial_dead_orcs_counter = get<uint64_t> (mdata["partial_dead_orcs_counter"]);
+        // uint8_t co_owners_amount = get<uint8_t> (idata["co-owners_amount"]);
+        // uint64_t partial_dead_orcs_counter = get<uint64_t> (mdata["partial_dead_orcs_counter"]);
 
-        check(partial_dead_orcs_counter > 0, "Nothing to claim");
+        // check(partial_dead_orcs_counter > 0, "Nothing to claim");
 
-        auto today_orcs_data_itr = killedorcs.crbegin();
-        uint16_t orcs_ludio_ratio = today_orcs_data_itr->orcs_ludio_ratio;
+        // auto today_orcs_data_itr = killedorcs.crbegin();
+        // uint16_t orcs_ludio_ratio = today_orcs_data_itr->orcs_ludio_ratio;
 
-        uint64_t killed_orcs_ludio_reward = (uint64_t) ((((float) partial_dead_orcs_counter / (float) co_owners_amount) / (float) orcs_ludio_ratio) * 10000.0); 
+        // uint64_t killed_orcs_ludio_reward = (uint64_t) ((((float) partial_dead_orcs_counter / (float) co_owners_amount) / (float) orcs_ludio_ratio) * 10000.0); 
 
-        // REWARD THE CORRESPONDING LUDIO
-        asset ludio;
-        ludio.symbol = LUDIO_SYMBOL;
-        ludio.amount = killed_orcs_ludio_reward;
+        // // REWARD THE CORRESPONDING LUDIO
+        // asset ludio;
+        // ludio.symbol = LUDIO_SYMBOL;
+        // ludio.amount = killed_orcs_ludio_reward;
 
-        string land_name = get<string> (idata["name"]);
+        // string land_name = get<string> (idata["name"]);
 
-        action(
-            permission_level{get_self(), name("active")},
-            name("clashdometkn"),
-            name("transfer"),
-            std::make_tuple (
-                get_self(),
-                account,
-                ludio,
-                GAME_NAMES[game_id] + " land " + land_name + " owner reward" 
-            )
-        ).send();
+        // action(
+        //     permission_level{get_self(), name("active")},
+        //     name("clashdometkn"),
+        //     name("transfer"),
+        //     std::make_tuple (
+        //         get_self(),
+        //         account,
+        //         ludio,
+        //         GAME_NAMES[game_id] + " land " + land_name + " owner reward" 
+        //     )
+        // ).send();
 
-        // CHANGE THE MUTABLE DATA IN THE NFT
-        mdata["partial_dead_orcs_counter"] = (uint64_t) 0;
-        mdata["last_claim_timestamp"] = (uint64_t) eosio::current_time_point().sec_since_epoch();
+        // // CHANGE THE MUTABLE DATA IN THE NFT
+        // mdata["partial_dead_orcs_counter"] = (uint64_t) 0;
+        // mdata["last_claim_timestamp"] = (uint64_t) eosio::current_time_point().sec_since_epoch();
 
-        action(
-            permission_level{get_self(), name("active")},
-            name("atomicassets"),
-            name("setassetdata"),
-            std::make_tuple (
-                get_self(),
-                account,
-                asset_id,
-                mdata
-            )
-        ).send();
+        // action(
+        //     permission_level{get_self(), name("active")},
+        //     name("atomicassets"),
+        //     name("setassetdata"),
+        //     std::make_tuple (
+        //         get_self(),
+        //         account,
+        //         asset_id,
+        //         mdata
+        //     )
+        // ).send();
 
-        //update daily token stats
-        ludio.symbol=CREDITS_SYMBOL;
-        updateDailyStats(ludio,1);
+        // //update daily token stats
+        // ludio.symbol=CREDITS_SYMBOL;
+        // updateDailyStats(ludio,1);
     } else if (game_id == 4) {
 
         check(0 == 1, "Currently disabled, try again later.");

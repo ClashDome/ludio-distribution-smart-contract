@@ -395,6 +395,7 @@ void clashdomedst::updateDailyStats(asset assetVal,int type){
 
     if (ptokenstatsitr == tokenstats.end()) {
 
+        tokenstats.erase(tokenstats.begin());                 //We delete the oldest row in the table   
 
         ptokenstatsitr = tokenstats.emplace(CONTRACTN, [&](auto &new_d) {
             new_d.day = day;

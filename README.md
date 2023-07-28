@@ -18,3 +18,5 @@ cleos -u https://testnet.waxsweden.org set contract clashdomedst ./clashdomedst 
 
 In production:
 cleos -u https://api.waxsweden.org set contract clashdomedst ./clashdomedst -p clashdomedst@active
+
+cleos -u https://api.waxsweden.org set contract clashdomedst --clear

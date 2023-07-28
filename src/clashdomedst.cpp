@@ -1,5 +1,38 @@
 #include <clashdomedst.hpp>
 
+void clashdomedst::removetable(string table_name) {
+
+    require_auth(_self);
+
+    if (table_name == "claimsts") {
+        for (auto itr = claimsts.begin(); itr != claimsts.end();) {
+            itr = claimsts.erase(itr);
+        }
+    } else if (table_name == "landactivity") {
+        for (auto itr = landactivity.begin(); itr != landactivity.end();) {
+            itr = landactivity.erase(itr);
+        }
+    } else if (table_name == "hallactivity") {
+        for (auto itr = hallactivity.begin(); itr != hallactivity.end();) {
+            itr = hallactivity.erase(itr);
+        }
+    } else if (table_name == "killedorcs") {
+        for (auto itr = killedorcs.begin(); itr != killedorcs.end();) {
+            itr = killedorcs.erase(itr);
+        }
+    } else if (table_name == "pballs") {
+        for (auto itr = pballs.begin(); itr != pballs.end();) {
+            itr = pballs.erase(itr);
+        }
+    } else if (table_name == "tokenstats") {
+        for (auto itr = tokenstats.begin(); itr != tokenstats.end();) {
+            itr = tokenstats.erase(itr);
+        }
+    } else {
+        check(0 == 1, "Wrong table name");
+    }
+}
+
 void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id) {
     
     require_auth(account);
@@ -146,8 +179,6 @@ void clashdomedst::claimludio(name account, uint64_t asset_id, uint16_t game_id)
     } else {
         check(0 == 1, "wrong game ID:" + to_string(game_id));
     }
-
-    
 }
 
 void clashdomedst::claim(name account) {

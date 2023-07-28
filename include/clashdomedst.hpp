@@ -17,6 +17,7 @@ public:
 
     using contract::contract;
 
+    ACTION removetable(string table_name);
     ACTION claimludio(name account, uint64_t asset_id, uint16_t game_id);
     ACTION claim(name account);
     ACTION updateorcs(uint32_t orcs, uint32_t day, uint16_t land_id, uint32_t partial_orcs);
